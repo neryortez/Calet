@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "649477859645",
+    "firebase_url": "https://calet-dc66e.firebaseio.com",
+    "project_id": "calet-dc66e",
+    "storage_bucket": "calet-dc66e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649477859645:android:52ddf6f95f9cc261",
+        "android_client_info": {
+          "package_name": "com.altechonduras.calet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "649477859645-dk12rldknf40f1lldoj50dhm2jd7taoq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.altechonduras.calet",
+            "certificate_hash": "90781a08c052247a84c692437e7b7334a736d928"
+          }
+        },
+        {
+          "client_id": "649477859645-uo18eslje9ito8toktspq9lo4c0ut30o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUk98oTs4KqNzdLlhkSNsuqAhD1OeXAzI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "649477859645-uo18eslje9ito8toktspq9lo4c0ut30o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
