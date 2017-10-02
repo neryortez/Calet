@@ -12,6 +12,7 @@ import android.widget.EditText;
 import com.altechonduras.calet.R;
 import com.altechonduras.calet.Utilities;
 import com.altechonduras.calet.objects.LPU;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
@@ -28,6 +29,7 @@ public class DialogLPU extends AlertDialog {
     private final EditText numeroTicket;
     private final EditText descripcion;
     private final EditText fecha;
+    private final EditText falla;
     private boolean editar = false;
     private LPU item = new LPU();
     public DialogLPU(@NonNull final Context context, final LPU item, final String key, boolean edit) {
@@ -43,6 +45,7 @@ public class DialogLPU extends AlertDialog {
         idSitio.setText(item.getIdSitio());
         nombreSitio.setText(item.getNombreSitio());
         numeroTicket.setText(item.getId());
+        falla.setText(item.getFalla());
         descripcion.setText(item.getDescripcion());
 
         setButton(BUTTON_NEGATIVE, "Borrar", borrar);
@@ -60,6 +63,7 @@ public class DialogLPU extends AlertDialog {
             numeroTicket.setKeyListener(null);
             descripcion.setKeyListener(null);
             fecha.setKeyListener(null);
+            falla.setKeyListener(null);
 
             setButton(BUTTON_POSITIVE, "Compartir", new OnClickListener() {
                 @Override
@@ -86,6 +90,7 @@ public class DialogLPU extends AlertDialog {
         nombreSitio = v.findViewById(R.id.nombre_sitio);
         numeroTicket = v.findViewById(R.id.numero_ticket);
         descripcion = v.findViewById(R.id.descripcion);
+        falla = v.findViewById(R.id.falla);
 
         setButton(BUTTON_POSITIVE, "guardar", clikc);
 
@@ -99,21 +104,23 @@ public class DialogLPU extends AlertDialog {
     private final OnClickListener clikc = new OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            item.setDescripcion(descripcion.getText().toString());
+            item.setTime(fecha.getText().toString());
             item.setIdSitio(idSitio.getText().toString());
             item.setNombreSitio(nombreSitio.getText().toString());
-            item.setId(numeroTicket.getText().toString());
             item.setRDA(rda.getText().toString());
+            item.setId(numeroTicket.getText().toString());
+            item.setFalla(falla.getText().toString());
+            item.setDescripcion(descripcion.getText().toString());
 
-//            SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-            item.setTime(fecha.getText().toString());
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext()));
+            reference.child("sent").setValue(false);
 
 
             if (!editando) {
-                FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext())).push().setValue(item);
+                reference.push().setValue(item);
             }
             else {
-                FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext())).child(key).setValue(item);
+                reference.child(key).setValue(item);
             }
         }
     };
@@ -142,6 +149,7 @@ public class DialogLPU extends AlertDialog {
                         "\nID de Sitio: " + item.getIdSitio() +
                         "\nNombre de Sitio: " + item.getNombreSitio() +
                         "\nNúmero de ticket: " + item.getId() +
+                        "\nFalla Reportada:" + item.getFalla() +
                         "\nDescripción: " + item.getDescripcion();
         emailIntent.putExtra(Intent.EXTRA_TEXT, body);
         context.startActivity(Intent.createChooser(emailIntent, "Enviar a..."));

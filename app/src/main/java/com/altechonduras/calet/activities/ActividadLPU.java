@@ -18,6 +18,8 @@ import com.altechonduras.calet.Utilities;
 import com.altechonduras.calet.dialogs.DialogLPU;
 import com.altechonduras.calet.objects.LPU;
 import com.altechonduras.calet.views.AdaptadorLPU;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.BufferedWriter;
@@ -78,64 +80,75 @@ public class ActividadLPU extends AppCompatActivity {
                         return;
 
                     } else {
-                        ArrayList<LPU> items = mMyAdapter.getItems();
+                        enviarPorCorreo(view);
+                    }
+                } else {
+                    enviarPorCorreo(view);
+                }
+            }
 
-                        StringBuilder body = new StringBuilder("<html><body><br><table>");
+            private void enviarPorCorreo(View view) {
+                ArrayList<LPU> items = mMyAdapter.getItems();
 
-                        for (LPU item :
-                                items) {
-                            body.append("<tr><td>")
-                                    .append(item.getTime()).append("</td><td>")
-                                    .append(item.getRDA()).append("</td><td>")
-                                    .append(item.getIdSitio()).append("</td><td>")
-                                    .append(item.getNombreSitio()).append("</td><td>")
-                                    .append(item.getId()).append("</td><td>")
-                                    .append(item.getDescripcion()).append("</td></tr>");
-                        }
-                        body.append("</table></body></html>");
+                StringBuilder body = new StringBuilder("<html><body><br><table border=1>");
 
-                        FileOutputStream fos = null;
-                        File file = new File(Environment.getExternalStorageDirectory().toString() + "/" + "abc.html");
-                        try {
-                            fos = new FileOutputStream(file.getAbsolutePath(), false);
-                            fos.write(body.toString().getBytes(), 0, body.toString().getBytes().length);
-                            fos.flush();
-                            fos.close();
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        } finally {
-                            if (fos != null) try {
-                                fos.close();
-                            } catch (IOException ie) {
-                                ie.printStackTrace();
-                            }
-                        }
-                        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                        emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
+                for (LPU item :
+                        items) {
+                    body.append("<tr><td>")
+                            .append(item.getTime()).append("</td><td>")
+                            .append(item.getNombreSitio()).append("</td><td>")
+                            .append(item.getIdSitio()).append("</td><td>")
+                            .append(item.getRDA()).append("</td><td>")
+                            .append(item.getId()).append("</td><td>")
+                            .append(FirebaseAuth.getInstance().getCurrentUser().getDisplayName()).append("</td><td>")
+                            .append(item.getFalla()).append("</td><td>")
+                            .append(item.getDescripcion()).append("</td></tr>");
+                }
+                body.append("</table></body></html>");
 
-                        String[] emails = {"davidpena.calet@gmail.com", "vmatute@grupocalet.com"};
-                        emailIntent.putExtra(Intent.EXTRA_EMAIL  , emails);
-                        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reportes LPU " /*+ item.getRDA()*/);
+                FileOutputStream fos = null;
+                File file = new File(Environment.getExternalStorageDirectory().toString() + "/" + "abc.html");
+                try {
+                    fos = new FileOutputStream(file.getAbsolutePath(), false);
+                    fos.write(body.toString().getBytes(), 0, body.toString().getBytes().length);
+                    fos.flush();
+                    fos.close();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                } finally {
+                    if (fos != null) try {
+                        fos.close();
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
+                }
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
 
-                        emailIntent.putExtra(Intent.EXTRA_TEXT   , "Adjunto encontrará el archivo con los reportes\n\n--Realizado con G-CALET REPORTES\n\nALTECH");
-                        emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                String[] emails = {"davidpena.calet@gmail.com", "vmatute@grupocalet.com"};
+                emailIntent.putExtra(Intent.EXTRA_EMAIL  , emails);
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reportes LPU " /*+ item.getRDA()*/);
+
+                emailIntent.putExtra(Intent.EXTRA_TEXT   , "Adjunto encontrará el archivo con los reportes\n\n--Realizado con G-CALET REPORTES\n\nALTECH");
+                emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
 
 //                view.getContext().startActivity(emailIntent);
 
-                        Intent i = new Intent(Intent.ACTION_SEND);
+                Intent i = new Intent(Intent.ACTION_SEND);
 //                        i.setData(Uri.parse("mailto:"));
-                        i.setType("text/html");
+                i.setType("text/html");
 //                i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(body.toString()));
-                        i.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-                        i.putExtra(Intent.EXTRA_EMAIL, emails);
-                        view.getContext().startActivity(Intent.createChooser(i, "Enviar por correo..."));
+                i.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                i.putExtra(Intent.EXTRA_EMAIL, emails);
+                i.putExtra(Intent.EXTRA_SUBJECT, "Reportes LPU " /*+ item.getRDA()*/);
+                view.getContext().startActivity(Intent.createChooser(i, "Enviar por correo..."));
 
-                        BufferedWriter bw = null;
-                        File tempData = new File(getFilesDir(), "tempFile");
-                        if (tempData.exists()) {
-                            tempData.delete();
-                        }
-                    }
+                ((DatabaseReference) mMyAdapter.getQuery()).child("sent").setValue(true);
+
+                BufferedWriter bw = null;
+                File tempData = new File(getFilesDir(), "tempFile");
+                if (tempData.exists()) {
+                    tempData.delete();
                 }
             }
         });

@@ -1,7 +1,5 @@
 package com.altechonduras.calet.views;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -60,29 +58,29 @@ public class AdaptadorMGP extends FirebaseRecyclerAdapter<AdaptadorMGP.ViewHolde
                 }
             });
 
-            view.findViewById(R.id.send).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                    emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
-//                    emailIntent.setType("message/rfc822");
-
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL  , new String[]{"davidpena.calet@gmail.com", "vmatute@grupocalet.com"});
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reporte: " + item.getRDA());
-
-                    String body =
-                            "RDA: " + item.getRDA() +
-                                    "\nID de Sitio: " + item.getIdSitio() +
-                                    "\nNombre de Sitio: " + item.getNombreSitio() +
-                                    "\nNúmero de ticket: " + item.getId() +
-                                    "\nCombustible: $" + item.getCombustible() +
-                                    "\nHora Inicio: " + item.getHoraInicio() +
-                                    "\nHora Final: " + item.getHoraFinal();
-                    emailIntent.putExtra(Intent.EXTRA_TEXT   , body);
-
-                    view.getContext().startActivity(emailIntent);
-                }
-            });
+//            view.findViewById(R.id.send).setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+//                    emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
+////                    emailIntent.setType("message/rfc822");
+//
+//                    emailIntent.putExtra(Intent.EXTRA_EMAIL  , new String[]{"davidpena.calet@gmail.com", "vmatute@grupocalet.com"});
+//                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reporte: " + item.getRDA());
+//
+//                    String body =
+//                            "RDA: " + item.getRDA() +
+//                                    "\nID de Sitio: " + item.getIdSitio() +
+//                                    "\nNombre de Sitio: " + item.getNombreSitio() +
+//                                    "\nNúmero de ticket: " + item.getId() +
+//                                    "\nCombustible: $" + item.getCombustible() +
+//                                    "\nHora Inicio: " + item.getHoraInicio() +
+//                                    "\nHora Final: " + item.getHoraFinal();
+//                    emailIntent.putExtra(Intent.EXTRA_TEXT   , body);
+//
+//                    view.getContext().startActivity(emailIntent);
+//                }
+//            });
         }
 
         public void setItem(MGP item) {

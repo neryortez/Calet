@@ -9,6 +9,7 @@ public class LPU {
     private String nombreSitio;
     private String id;
     private String name;
+    private String falla;
     private String descripcion;
     private String time;
 
@@ -68,5 +69,13 @@ public class LPU {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getFalla() {
+        return falla;
+    }
+
+    public void setFalla(String falla) {
+        this.falla = falla;
     }
 }

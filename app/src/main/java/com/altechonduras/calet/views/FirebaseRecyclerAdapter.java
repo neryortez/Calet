@@ -76,7 +76,12 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
             String key = dataSnapshot.getKey();
 
             if (!mKeys.contains(key)) {
-                T item = getConvertedObject(dataSnapshot);
+                T item = null;
+                try {
+                    item = getConvertedObject(dataSnapshot);
+                } catch (Exception e) {
+                    return;
+                }
                 int insertedPosition;
                 if (previousChildName == null) {
                     mItems.add(0, item);
@@ -136,7 +141,12 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
             String key = dataSnapshot.getKey();
 
             int index = mKeys.indexOf(key);
-            T item = getConvertedObject(dataSnapshot);
+            T item = null;
+            try {
+                item = getConvertedObject(dataSnapshot);
+            } catch (Exception e) {
+                return;
+            }
             mItems.remove(index);
             mKeys.remove(index);
             int newPosition;
@@ -218,6 +228,14 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      */
     public T getItem(int position) {
         return mItems.get(position);
+    }
+
+    /**
+     * Returns the FirebaseDatabase of this adapter.
+     * @return the Query
+     */
+    public Query getQuery() {
+        return mQuery;
     }
 
     /**

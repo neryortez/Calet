@@ -3,6 +3,7 @@ package com.altechonduras.calet.dialogs;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import android.widget.TimePicker;
 import com.altechonduras.calet.R;
 import com.altechonduras.calet.Utilities;
 import com.altechonduras.calet.objects.MGP;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
@@ -65,8 +67,16 @@ public class DialogMGP extends AlertDialog {
             combustible.setKeyListener(null);
             horaInicio.setOnClickListener(null);
             horaFinal.setOnClickListener(null);
+
+            setButton(BUTTON_POSITIVE, "Compartir", new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    copiar(item, getContext());
+                }
+            });
         }
     }
+
     public DialogMGP(@NonNull final Context context){
         super(context);
         setTitle(R.string.NuevoMGP);
@@ -142,11 +152,14 @@ public class DialogMGP extends AlertDialog {
             SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
             item.setFecha(f.format(Calendar.getInstance().getTime()));
 
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext()));
+            reference.child("sent").setValue(false);
+
             if (!editando) {
-                FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext())).push().setValue(item);
+                reference.push().setValue(item);
             }
             else {
-                FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext())).child(key).setValue(item);
+                reference.child(key).setValue(item);
             }
         }
     };
@@ -166,4 +179,21 @@ public class DialogMGP extends AlertDialog {
                     .show();
         }
     };
+
+    private void copiar(MGP item, Context context) {
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setType("text/plain");
+
+        String body =
+                "RDA: " + item.getRDA() +
+                        "\nID de Sitio: " + item.getIdSitio() +
+                        "\nNombre de Sitio: " + item.getNombreSitio() +
+                        "\nNúmero de ticket: " + item.getId() +
+                        "\nCombustible: " + item.getCombustible() +
+                        "\nHora Inicial: " + item.getHoraInicio() +
+                        "\nHora Final: " + item.getHoraFinal()
+                        ;
+        emailIntent.putExtra(Intent.EXTRA_TEXT, body);
+        context.startActivity(Intent.createChooser(emailIntent, "Enviar a..."));
+    }
 }
