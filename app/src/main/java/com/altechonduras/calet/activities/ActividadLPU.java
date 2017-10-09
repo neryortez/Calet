@@ -100,7 +100,7 @@ public class ActividadLPU extends AppCompatActivity {
                             .append(item.getIdSitio()).append("</td><td>")
                             .append(item.getRDA()).append("</td><td>")
                             .append(item.getId()).append("</td><td>")
-                            .append(FirebaseAuth.getInstance().getCurrentUser().getDisplayName()).append("</td><td>")
+                            .append(FirebaseAuth.getInstance().getCurrentUser().getEmail()).append("</td><td>")
                             .append(item.getFalla()).append("</td><td>")
                             .append(item.getDescripcion()).append("</td></tr>");
                 }

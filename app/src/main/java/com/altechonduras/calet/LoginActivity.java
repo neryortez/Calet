@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -65,14 +66,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-        FirebaseDatabase.getInstance().getReference().child("users").addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override public void onDataChange(DataSnapshot dataSnapshot) {
-                        dataSnapshot.getValue();
-                    } @Override public void onCancelled(DatabaseError databaseError) {}
-                }
-        );
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        String notFirstRun = "notFirstRun";
+        if (preferences.getBoolean(notFirstRun, false)) {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            preferences.edit().putBoolean(notFirstRun, true).apply();
+        }
+
 
         mAuth = FirebaseAuth.getInstance();
 
