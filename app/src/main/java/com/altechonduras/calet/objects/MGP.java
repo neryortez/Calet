@@ -1,9 +1,11 @@
 package com.altechonduras.calet.objects;
 
+import android.support.annotation.Keep;
+
 /**
  * Created by Nery Ortez on 27-Sep-17.
  */
-
+@Keep
 public class MGP {
         private String RDA;
         private String idSitio;
@@ -20,6 +22,10 @@ public class MGP {
         public String getId() {
             return id;
         }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
         public String getRDA() {
             return RDA;
@@ -67,10 +73,6 @@ public class MGP {
 
         public void setHoraFinal(String horaFinal) {
             this.horaFinal = horaFinal;
-        }
-
-        public void setId(String id) {
-            this.id = id;
         }
 
     public String getFecha() {

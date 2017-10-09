@@ -1,8 +1,11 @@
 package com.altechonduras.calet.objects;
 
+import android.support.annotation.Keep;
+
 /**
  * Created by Nery Ortez on 27-Sep-17.
  */
+@Keep
 public class LPU {
     private String RDA;
     private String idSitio;
@@ -19,8 +22,16 @@ public class LPU {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDescripcion() {
         return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public String getRDA() {
@@ -53,14 +64,6 @@ public class LPU {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
     }
 
     public String getTime() {

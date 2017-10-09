@@ -1,9 +1,11 @@
 package com.altechonduras.calet.objects;
 
+import android.support.annotation.Keep;
+
 /**
  * Created by Nery Ortez on 28-Sep-17.
  */
-
+@Keep
 public class User {
     private String name;
     private String uid;
