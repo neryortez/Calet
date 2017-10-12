@@ -12,6 +12,7 @@ public class User {
     private String otro;
     private String email;
     private boolean logged;
+    private String device;
 
     public User() {}
 
@@ -53,5 +54,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 }

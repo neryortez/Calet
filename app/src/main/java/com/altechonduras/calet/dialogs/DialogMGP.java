@@ -34,8 +34,48 @@ public class DialogMGP extends AlertDialog {
     private final Button horaInicio;
     private final Button horaFinal;
     private String key = "";
+    private final OnClickListener borrar = new OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            new AlertDialog.Builder(getContext())
+                    .setMessage("¿Está seguro de eliminar este reporte?\nÉsta operación no se puede deshacer.")
+                    .setPositiveButton("Borrar", new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext())).child(key).setValue(null);
+                        }
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        }
+    };
     private boolean editando = false;
     private MGP item = new MGP();
+    private final OnClickListener clikc = new OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            item.setCombustible(combustible.getText().toString());
+            item.setIdSitio(idSitio.getText().toString());
+            item.setNombreSitio(nombreSitio.getText().toString());
+            item.setId(numeroTicket.getText().toString());
+            item.setRDA(rda.getText().toString());
+
+            item.setHoraInicio(horaInicio.getText().toString());
+            item.setHoraFinal(horaFinal.getText().toString());
+
+            SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+            item.setFecha(f.format(Calendar.getInstance().getTime()));
+
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext()));
+            reference.child("sent").setValue(false);
+
+            if (!editando) {
+                reference.push().setValue(item);
+            } else {
+                reference.child(key).setValue(item);
+            }
+        }
+    };
 
     public DialogMGP(@NonNull final Context context, final MGP item, final String key, boolean edit) {
         this(context);
@@ -136,49 +176,6 @@ public class DialogMGP extends AlertDialog {
         setButton(BUTTON_NEUTRAL, "cancelar", ((OnClickListener) null));
 
     }
-
-    private final OnClickListener clikc = new OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            item.setCombustible(combustible.getText().toString());
-            item.setIdSitio(idSitio.getText().toString());
-            item.setNombreSitio(nombreSitio.getText().toString());
-            item.setId(numeroTicket.getText().toString());
-            item.setRDA(rda.getText().toString());
-
-            item.setHoraInicio(horaInicio.getText().toString());
-            item.setHoraFinal(horaFinal.getText().toString());
-
-            SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-            item.setFecha(f.format(Calendar.getInstance().getTime()));
-
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext()));
-            reference.child("sent").setValue(false);
-
-            if (!editando) {
-                reference.push().setValue(item);
-            }
-            else {
-                reference.child(key).setValue(item);
-            }
-        }
-    };
-
-    private final OnClickListener borrar = new OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            new AlertDialog.Builder(getContext())
-                    .setMessage("¿Está seguro de realizar esta operación? Ésta operación no se puede deshacer.")
-                    .setPositiveButton("Borrar", new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext())).child(key).setValue(null);
-                        }
-                    })
-                    .setNegativeButton("Cancelar", null)
-                    .show();
-        }
-    };
 
     private void copiar(MGP item, Context context) {
         Intent emailIntent = new Intent(Intent.ACTION_SEND);

@@ -32,6 +32,46 @@ public class DialogLPU extends AlertDialog {
     private final EditText falla;
     private boolean editar = false;
     private LPU item = new LPU();
+    private boolean editando = false;
+    private String key;
+    private final OnClickListener clikc = new OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            item.setTime(fecha.getText().toString());
+            item.setIdSitio(idSitio.getText().toString());
+            item.setNombreSitio(nombreSitio.getText().toString());
+            item.setRDA(rda.getText().toString());
+            item.setId(numeroTicket.getText().toString());
+            item.setFalla(falla.getText().toString());
+            item.setDescripcion(descripcion.getText().toString());
+
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext()));
+            reference.child("sent").setValue(false);
+
+
+            if (!editando) {
+                reference.push().setValue(item);
+            } else {
+                reference.child(key).setValue(item);
+            }
+        }
+    };
+    private final OnClickListener borrar = new OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            new AlertDialog.Builder(getContext())
+                    .setMessage("¿Está seguro de eliminar este reporte?\nÉsta operación no se puede deshacer.")
+                    .setPositiveButton("Borrar", new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext())).child(key).setValue(null);
+                        }
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        }
+    };
+
     public DialogLPU(@NonNull final Context context, final LPU item, final String key, boolean edit) {
         this(context);
         this.item = item;
@@ -73,7 +113,6 @@ public class DialogLPU extends AlertDialog {
             });
         }
     }
-
     public DialogLPU(@NonNull Context context) {
         super(context);
         setTitle(R.string.NuevoLPU);
@@ -96,49 +135,6 @@ public class DialogLPU extends AlertDialog {
 
         setButton(BUTTON_NEUTRAL, "cancelar", ((OnClickListener) null));
     }
-
-    private boolean editando = false;
-
-    private String key;
-
-    private final OnClickListener clikc = new OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            item.setTime(fecha.getText().toString());
-            item.setIdSitio(idSitio.getText().toString());
-            item.setNombreSitio(nombreSitio.getText().toString());
-            item.setRDA(rda.getText().toString());
-            item.setId(numeroTicket.getText().toString());
-            item.setFalla(falla.getText().toString());
-            item.setDescripcion(descripcion.getText().toString());
-
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext()));
-            reference.child("sent").setValue(false);
-
-
-            if (!editando) {
-                reference.push().setValue(item);
-            }
-            else {
-                reference.child(key).setValue(item);
-            }
-        }
-    };
-    private final OnClickListener borrar = new OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            new AlertDialog.Builder(getContext())
-                    .setMessage("¿Está seguro de realizar esta operación? Ésta operación no se puede deshacer.")
-                    .setPositiveButton("Borrar", new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext())).child(key).setValue(null);
-                        }
-                    })
-                    .setNegativeButton("Cancelar", null)
-                    .show();
-        }
-    };
 
     private void copiar(LPU item, Context context) {
         Intent emailIntent = new Intent(Intent.ACTION_SEND);

@@ -33,6 +33,69 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
+    private View.OnClickListener delete = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mDatabase.getReference(Utilities.getLPUdir(MainActivity.this)).child("sent").addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (!dataSnapshot.exists()) {
+                                showVallaAEnviar();
+                                return;
+                            }
+                            if (dataSnapshot.getValue(boolean.class)) {
+                                mDatabase.getReference(Utilities.getMGPdir(MainActivity.this)).child("sent").addListenerForSingleValueEvent(
+                                        new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                if (!dataSnapshot.exists()) {
+                                                    showVallaAEnviar();
+                                                    return;
+                                                }
+                                                if (dataSnapshot.getValue(boolean.class)) {
+                                                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                                                            .setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                                    new AlertDialog.Builder(MainActivity.this)
+                                                                            .setMessage("Por favor confirme nuevamente")
+                                                                            .setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
+                                                                                @Override
+                                                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                                                    String firebaseLocation = Utilities.getLPUdir(getApplicationContext());
+                                                                                    FirebaseDatabase.getInstance().getReference(firebaseLocation).setValue(null);
+                                                                                    firebaseLocation = Utilities.getMGPdir(getApplicationContext());
+                                                                                    FirebaseDatabase.getInstance().getReference(firebaseLocation).setValue(null);
+                                                                                }
+                                                                            })
+                                                                            .setNegativeButton("Cancelar", null)
+                                                                            .setTitle("Alerta!")
+                                                                            .show();
+                                                                }
+                                                            })
+                                                            .setNegativeButton("Cancelar", null)
+                                                            .setTitle("Alerta!")
+                                                            .setMessage("La siguiente operación eliminará TODOS los reportes guardados, tanto de LPU como de MGP." +
+                                                                    "\nEsta operación no se puede deshacer.")
+                                                            .create();
+                                                    dialog.show();
+
+                                                } else {
+                                                    showVallaAEnviar();
+                                                }
+                                            } @Override public void onCancelled(DatabaseError databaseError) {}
+                                        }
+                                );
+                            } else {
+                                showVallaAEnviar();
+                            }
+                        } @Override public void onCancelled(DatabaseError databaseError) {}
+                    }
+            );
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,15 +122,22 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FirebaseDatabase.getInstance().getReference("/users/" + mAuth.getCurrentUser().getUid())
-                        .child("logged").setValue(false)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setMessage("¿Esta seguro de cerrar esta sesión?")
+                        .setPositiveButton("Cerrar Sesión", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                System.exit(0);
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                FirebaseDatabase.getInstance().getReference("/users/" + mAuth.getCurrentUser().getUid())
+                                        .child("device").setValue(null)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                System.exit(0);
+                                            }
+                                        });
+                                FirebaseAuth.getInstance().signOut();
                             }
-                        });
-                FirebaseAuth.getInstance().signOut();
+                        }).setNegativeButton("Cancelar", null).show();
             }
         });
 
@@ -100,73 +170,10 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
     }
 
-    private View.OnClickListener delete = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            mDatabase.getReference(Utilities.getLPUdir(MainActivity.this)).child("sent").addListenerForSingleValueEvent(
-                    new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (!dataSnapshot.exists()) {
-                                showVallaAEnviar();
-                                return;
-                            }
-                            if (dataSnapshot.getValue(boolean.class)) {
-                                mDatabase.getReference(Utilities.getMGPdir(MainActivity.this)).child("sent").addListenerForSingleValueEvent(
-                                        new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                if (!dataSnapshot.exists()) {
-                                                    showVallaAEnviar();
-                                                    return;
-                                                }
-                                                if (dataSnapshot.getValue(boolean.class)) {
-                                                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                                                            .setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                                    new AlertDialog.Builder(MainActivity.this)
-                                                                            .setMessage("¿Está seguro?")
-                                                                            .setPositiveButton("Sí", new DialogInterface.OnClickListener() {
-                                                                                @Override
-                                                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                                                    String firebaseLocation = Utilities.getLPUdir(getApplicationContext());
-                                                                                    FirebaseDatabase.getInstance().getReference(firebaseLocation).setValue(null);
-                                                                                    firebaseLocation = Utilities.getMGPdir(getApplicationContext());
-                                                                                    FirebaseDatabase.getInstance().getReference(firebaseLocation).setValue(null);
-                                                                                }
-                                                                            })
-                                                                            .setNegativeButton("No", null)
-                                                                            .setTitle("Alerta!")
-                                                                            .show();
-                                                                }
-                                                            })
-                                                            .setNegativeButton("Cancelar", null)
-                                                            .setTitle("Alerta!")
-                                                            .setMessage("La siguiente operación eliminará TODOS los reportes guardados.\nEsta operación no se puede deshacer")
-                                                            .create();
-                                                    dialog.show();
-
-                                                } else {
-                                                    showVallaAEnviar();
-                                                }
-                                            } @Override public void onCancelled(DatabaseError databaseError) {}
-                                        }
-                                );
-                            } else {
-                                showVallaAEnviar();
-                            }
-                        } @Override public void onCancelled(DatabaseError databaseError) {}
-                    }
-            );
-        }
-    };
-
     private void showVallaAEnviar() {
         new AlertDialog.Builder(this)
-                .setTitle("Mensaje")
                 .setMessage("Favor envíe los reportes MGP y LPU para poder realizar esta operación.")
-                .setNeutralButton("OK", null).show();
+                .show();
     }
 
     private void enviarPorCorreo(View view) {

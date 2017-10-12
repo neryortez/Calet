@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -45,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private FirebaseDatabase database;
 
     @Override
     public void onStart() {
@@ -56,10 +59,64 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser currentUser) {
         if (currentUser != null) {
-            startActivity(new Intent(this, MainActivity.class));
-            this.finish();
+            checkIfThisDeviceLogged(currentUser, null);
+//                startActivity(new Intent(this, MainActivity.class));
+//                this.finish();
+
         }
     }
+
+    private void checkIfThisDeviceLogged(FirebaseUser currentUser, final DataSnapshot dataSnapshot) {
+        showProgress(true);
+        if (dataSnapshot != null) {
+            User user = dataSnapshot.getValue(User.class);
+            if (getUserValid(user, dataSnapshot)) {
+                if (user.getDevice().equalsIgnoreCase(Utilities.getDevice(this))) {
+                    startActivity(new Intent(this, MainActivity.class));
+                    this.finish();
+                } else {
+                    showProgress(false);
+                    Snackbar.make(mEmailView, "Esta cuenta está activa en otro dispositivo.", Snackbar.LENGTH_LONG)
+                            .setAction("Más", new OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    new AlertDialog.Builder(LoginActivity.this)
+                                            .setMessage("Esta cuenta esta siendo usada por otro dispositovo." +
+                                                    "\n\nAsegurese de haber cerrado sesión en cualquier otro telefono o " +
+                                                    "comuniquese con el administrador de las cuentas para verificar el problema.")
+                                            .show();
+                                }
+                            }).show();
+                }
+            } else {
+                showProgress(false);
+                Snackbar.make(mEmailView, "Ocurrió un error. Por favor intentelo otra vez", Snackbar.LENGTH_LONG).show();
+            }
+        } else {
+            database.getReference("users").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    checkIfThisDeviceLogged(null, snapshot);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            });
+        }
+    }
+
+    private boolean getUserValid(User user, DataSnapshot snapshot) {
+        if (user != null) {
+            if (user.getDevice() == null) {
+                user.setDevice(Utilities.getDevice(this));
+                snapshot.getRef().setValue(user);
+            }
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +130,8 @@ public class LoginActivity extends AppCompatActivity {
             preferences.edit().putBoolean(notFirstRun, true).apply();
         }
 
+
+        database = FirebaseDatabase.getInstance();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -167,31 +226,34 @@ public class LoginActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d(TAG, "signInWithEmail:success");
-                                final FirebaseUser user = mAuth.getCurrentUser();
-                                FirebaseDatabase.getInstance().getReference("/users/" + user.getUid())
+                                final FirebaseUser user = task.getResult().getUser();
+                                database.getReference("/users/" + user.getUid())
                                         .addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override public void onDataChange(DataSnapshot dataSnapshot) {
                                                 if (dataSnapshot.exists()) {
-                                                    User frUser = dataSnapshot.getValue(User.class);
-                                                    if (!frUser.isLogged()) {
-                                                        updateUI(user);
-                                                        frUser.setLogged(true);
-                                                        dataSnapshot.getRef().setValue(frUser);
-                                                    } else {
-                                                        FirebaseAuth.getInstance().signOut();
-                                                        Toast.makeText(LoginActivity.this, "El usuario esta registrado en otro dispositivo",
-                                                                Toast.LENGTH_LONG).show();
-                                                        showProgress(false);
-                                                    }
+                                                    checkIfThisDeviceLogged(user, dataSnapshot);
+//                                                    User frUser = dataSnapshot.getValue(User.class);
+//                                                    if (!frUser.isLogged()) {
+//                                                        updateUI(user);
+//                                                        frUser.setLogged(true);
+//                                                        dataSnapshot.getRef().setValue(frUser);
+//                                                    } else {
+//                                                        FirebaseAuth.getInstance().signOut();
+//                                                        Toast.makeText(LoginActivity.this, "El usuario esta registrado en otro dispositivo",
+//                                                                Toast.LENGTH_LONG).show();
+//                                                        showProgress(false);
+//                                                    }
                                                 } else {
                                                     User u = new User();
                                                     u.setLogged(true);
                                                     u.setName("Cuadrilla Nueva - " + user.getEmail());
                                                     u.setUid(user.getUid());
                                                     u.setEmail(user.getEmail());
+                                                    u.setDevice(Utilities.getDevice(LoginActivity.this));
                                                     dataSnapshot.getRef().setValue(new User());
 
                                                     updateUI(user);
+                                                    showProgress(false);
                                                 }
                                             }
                                             @Override public void onCancelled(DatabaseError databaseError) {
