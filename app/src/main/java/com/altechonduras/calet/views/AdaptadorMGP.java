@@ -70,9 +70,9 @@ public class AdaptadorMGP extends FirebaseRecyclerAdapter<AdaptadorMGP.ViewHolde
 //
 //                    String body =
 //                            "RDA: " + item.getRDA() +
-//                                    "\nID de Sitio: " + item.getIdSitio() +
+//                                    "\nID de Sitio: " + item.getGasto() +
 //                                    "\nNombre de Sitio: " + item.getNombreSitio() +
-//                                    "\nNúmero de ticket: " + item.getId() +
+//                                    "\nNúmero de ticket: " + item.getAutorizado() +
 //                                    "\nCombustible: $" + item.getCombustible() +
 //                                    "\nHora Inicio: " + item.getHoraInicio() +
 //                                    "\nHora Final: " + item.getHoraFinal();

@@ -22,6 +22,10 @@
             android:label="@string/title_activity_actividad_lpu"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".activities.ActividadGasto"
+            android:label="@string/gastos_title"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login">
             <intent-filter>

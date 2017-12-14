@@ -15,6 +15,8 @@ public class MGP {
         private String horaFinal;
         private String fecha;
         private String id;
+    private String gastoAcarreo;
+    private String comentarios;
 
         public MGP() {}
 
@@ -81,5 +83,21 @@ public class MGP {
 
     public void setFecha(String fecha) {
         this.fecha = fecha;
+    }
+
+    public String getGastoAcarreo() {
+        return gastoAcarreo;
+    }
+
+    public void setGastoAcarreo(String gastoAcarreo) {
+        this.gastoAcarreo = gastoAcarreo;
+    }
+
+    public String getComentarios() {
+        return comentarios;
+    }
+
+    public void setComentarios(String comentarios) {
+        this.comentarios = comentarios;
     }
 }

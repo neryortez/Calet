@@ -33,6 +33,9 @@ public class DialogMGP extends AlertDialog {
     private final EditText combustible;
     private final Button horaInicio;
     private final Button horaFinal;
+    private final EditText gastoAcarreo;
+    private final EditText comentarios;
+    private final EditText fecha;
     private String key = "";
     private final OnClickListener borrar = new OnClickListener() {
         @Override
@@ -63,8 +66,11 @@ public class DialogMGP extends AlertDialog {
             item.setHoraInicio(horaInicio.getText().toString());
             item.setHoraFinal(horaFinal.getText().toString());
 
-            SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-            item.setFecha(f.format(Calendar.getInstance().getTime()));
+//            SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+//            item.setFecha(f.format(Calendar.getInstance().getTime()));
+            item.setFecha(fecha.getText().toString());
+            item.setComentarios(comentarios.getText().toString());
+            item.setGastoAcarreo(gastoAcarreo.getText().toString());
 
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext()));
             reference.child("sent").setValue(false);
@@ -88,6 +94,10 @@ public class DialogMGP extends AlertDialog {
         horaInicio.setText(item.getHoraInicio());
         horaFinal.setText(item.getHoraFinal());
 
+        fecha.setText(item.getFecha());
+        comentarios.setText(item.getComentarios());
+        gastoAcarreo.setText(item.getGastoAcarreo());
+
         this.key = key;
         editando = true;
 
@@ -108,6 +118,10 @@ public class DialogMGP extends AlertDialog {
             horaInicio.setOnClickListener(null);
             horaFinal.setOnClickListener(null);
 
+            fecha.setOnClickListener(null);
+            gastoAcarreo.setOnClickListener(null);
+            comentarios.setOnClickListener(null);
+
             setButton(BUTTON_POSITIVE, "Compartir", new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -124,10 +138,16 @@ public class DialogMGP extends AlertDialog {
 
         setView(v);
 
+        fecha = v.findViewById(R.id.fecha);
+        SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+        fecha.setText(f.format(Calendar.getInstance().getTime()));
+
+        gastoAcarreo = v.findViewById(R.id.gastoAcarreo);
+        comentarios = v.findViewById(R.id.comentarios);
         rda = v.findViewById(R.id.rda);
         idSitio = v.findViewById(R.id.id_sitio);
         nombreSitio = v.findViewById(R.id.nombre_sitio);
-        numeroTicket = v.findViewById(R.id.numero_ticket);
+        numeroTicket = v.findViewById(R.id.autorizado);
         combustible = v.findViewById(R.id.combustible);
         horaInicio = v.findViewById(R.id.horaInicio);
         horaInicio.setOnClickListener(new View.OnClickListener() {
@@ -187,9 +207,10 @@ public class DialogMGP extends AlertDialog {
                         "\nNombre de Sitio: " + item.getNombreSitio() +
                         "\nNúmero de ticket: " + item.getId() +
                         "\nCombustible: " + item.getCombustible() +
+                        "\nGasto Acarreo: " + item.getGastoAcarreo() +
                         "\nHora Inicial: " + item.getHoraInicio() +
-                        "\nHora Final: " + item.getHoraFinal()
-                        ;
+                        "\nHora Final: " + item.getHoraFinal() +
+                        "\nComentarios: " + item.getComentarios();
         emailIntent.putExtra(Intent.EXTRA_TEXT, body);
         context.startActivity(Intent.createChooser(emailIntent, "Enviar a..."));
     }

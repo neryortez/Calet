@@ -9,19 +9,19 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.altechonduras.calet.R;
-import com.altechonduras.calet.dialogs.DialogLPU;
-import com.altechonduras.calet.objects.LPU;
+import com.altechonduras.calet.dialogs.DialogGasto;
+import com.altechonduras.calet.objects.Gasto;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
 
-public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolder, LPU> {
-    public AdaptadorLPU(Query query, @Nullable ArrayList<LPU> items, @Nullable ArrayList<String> keys) {
+public class AdaptadorGasto extends FirebaseRecyclerAdapter<AdaptadorGasto.ViewHolder, Gasto> {
+    public AdaptadorGasto(Query query, @Nullable ArrayList<Gasto> items, @Nullable ArrayList<String> keys) {
         super(query, items, keys);
     }
 
     @Override
-    public AdaptadorLPU.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AdaptadorGasto.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item, parent, false);
 
@@ -29,19 +29,19 @@ public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(AdaptadorLPU.ViewHolder holder, int position) {
-        LPU item = getItem(position);
+    public void onBindViewHolder(AdaptadorGasto.ViewHolder holder, int position) {
+        Gasto item = getItem(position);
         holder.textViewDescription.setText(item.getTime());
         holder.textViewName.setText(item.getNombreSitio());
         holder.setItem(item);
         holder.setKey(getKeys().get(position));
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder {
         private final Button mas;
         TextView textViewName;
         TextView textViewDescription;
-        private LPU item;
+        private Gasto item;
         private String key;
 
         ViewHolder(View view) {
@@ -53,7 +53,7 @@ public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolde
             mas.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    new DialogLPU(view.getContext(), item, key, false).show();
+                    new DialogGasto(view.getContext(), item, key, false).show();
                 }
             });
 
@@ -79,7 +79,7 @@ public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolde
 //            });
         }
 
-        void setItem(LPU item) {
+        void setItem(Gasto item) {
             this.item = item;
         }
 

@@ -6,10 +6,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.TextView;
 
+import com.altechonduras.calet.activities.ActividadGasto;
 import com.altechonduras.calet.activities.ActividadLPU;
 import com.altechonduras.calet.activities.ActividadMGP;
 import com.altechonduras.calet.activities.SettingsActivity;
@@ -112,10 +115,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.reportegastos).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                startActivity(new Intent(getApplicationContext(), ActividadGasto.class));
+            }
+        });
+
         findViewById(R.id.reportesmgp).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getApplicationContext(), ActividadMGP.class));
+            }
+        });
+
+        findViewById(R.id.reportefoto).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Coming soon...", Snackbar.LENGTH_INDEFINITE).show();
             }
         });
 
@@ -161,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        ((TextView) findViewById(R.id.user)).setText("Usuario: " + mAuth.getCurrentUser().getEmail());
     }
 
     @Override

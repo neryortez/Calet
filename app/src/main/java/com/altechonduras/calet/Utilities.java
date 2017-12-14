@@ -22,6 +22,11 @@ public class Utilities {
 
     }
 
+    public static String getGastodir(Context context) {
+        return context.getString(R.string.gasto_location) + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+    }
+
     public static String getDevice(Context context) {
         String device = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(DEVICE, null);
         if (device == null) {

@@ -70,8 +70,9 @@ public class LoginActivity extends AppCompatActivity {
         showProgress(true);
         if (dataSnapshot != null) {
             User user = dataSnapshot.getValue(User.class);
-            if (getUserValid(user, dataSnapshot)) {
-                if (user.getDevice().equalsIgnoreCase(Utilities.getDevice(this))) {
+            if (getUserValid(user)) {
+                if (usuarioSinLogearOSinDispotivo(user)) {
+                    escribirDatosDeUsuario(user, currentUser, dataSnapshot);
                     startActivity(new Intent(this, MainActivity.class));
                     this.finish();
                 } else {
@@ -96,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
             database.getReference("users").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    checkIfThisDeviceLogged(null, snapshot);
+                    checkIfThisDeviceLogged(FirebaseAuth.getInstance().getCurrentUser(), snapshot);
                 }
 
                 @Override
@@ -106,12 +107,21 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private boolean getUserValid(User user, DataSnapshot snapshot) {
+    private void escribirDatosDeUsuario(User user, FirebaseUser currentUser, DataSnapshot dataSnapshot) {
+        user.setDevice(Utilities.getDevice(this));
+        user.setEmail(currentUser.getEmail());
+        dataSnapshot.getRef().setValue(user);
+    }
+
+    private boolean usuarioSinLogearOSinDispotivo(User user) {
+        if (user.getDevice() == null) return true;
+        if (user.getDevice().isEmpty()) return true;
+        if (user.getDevice().equalsIgnoreCase(Utilities.getDevice(this))) return true;
+        return false;
+    }
+
+    private boolean getUserValid(User user) {
         if (user != null) {
-            if (user.getDevice() == null) {
-                user.setDevice(Utilities.getDevice(this));
-                snapshot.getRef().setValue(user);
-            }
             return true;
         }
         return false;

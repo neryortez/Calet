@@ -6,25 +6,27 @@ import android.support.annotation.Keep;
  * Created by Nery Ortez on 27-Sep-17.
  */
 @Keep
-public class LPU {
-    private String RDA;
-    private String idSitio;
-    private String nombreSitio;
-    private String id;
-    private String name;
-    private String falla;
-    private String descripcion;
+public class Gasto {
     private String time;
-    private String materiales;
+    private String RDA;
+    private String nombreSitio;
+    private String gasto;
+    private String autorizado;
+    private String pagoA;
+    private String cedula;
+    private String descripcion;
 
-    public LPU() {}
+    private String telefono;
 
-    public String getName() {
-        return name;
+    public Gasto() {
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getPagoA() {
+        return pagoA;
+    }
+
+    public void setPagoA(String pagoA) {
+        this.pagoA = pagoA;
     }
 
     public String getDescripcion() {
@@ -43,12 +45,12 @@ public class LPU {
         this.RDA = RDA;
     }
 
-    public String getIdSitio() {
-        return idSitio;
+    public String getGasto() {
+        return gasto;
     }
 
-    public void setIdSitio(String idSitio) {
-        this.idSitio = idSitio;
+    public void setGasto(String gasto) {
+        this.gasto = gasto;
     }
 
     public String getNombreSitio() {
@@ -59,12 +61,12 @@ public class LPU {
         this.nombreSitio = nombreSitio;
     }
 
-    public String getId() {
-        return id;
+    public String getAutorizado() {
+        return autorizado;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setAutorizado(String autorizado) {
+        this.autorizado = autorizado;
     }
 
     public String getTime() {
@@ -75,19 +77,19 @@ public class LPU {
         this.time = time;
     }
 
-    public String getFalla() {
-        return falla;
+    public String getCedula() {
+        return cedula;
     }
 
-    public void setFalla(String falla) {
-        this.falla = falla;
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
     }
 
-    public String getMateriales() {
-        return materiales;
+    public String getTelefono() {
+        return telefono;
     }
 
-    public void setMateriales(String materiales) {
-        this.materiales = materiales;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 }

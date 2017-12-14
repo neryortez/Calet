@@ -91,13 +91,16 @@ public class ActividadMGP extends AppCompatActivity {
                         items) {
                     body.append("<tr><td>")
                             .append(item.getFecha()).append("</td><td>")
+                            .append(item.getFecha()).append("</td><td>")
                             .append(item.getIdSitio()).append("</td><td>")
                             .append(item.getNombreSitio()).append("</td><td>")
                             .append(item.getRDA()).append("</td><td>")
                             .append(item.getId()).append("</td><td>")
                             .append(item.getHoraInicio()).append("</td><td>")
                             .append(item.getHoraFinal()).append("</td><td>")
-                            .append(item.getCombustible()).append("</td></tr>");
+                            .append(item.getCombustible()).append("</td><td>")
+                            .append(item.getGastoAcarreo()).append("</td><td>")
+                            .append(item.getComentarios()).append("</td></tr>");
                 }
                 body.append("</table></body></html>");
 
@@ -120,7 +123,7 @@ public class ActividadMGP extends AppCompatActivity {
                 Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
                 emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
 
-                String[] emails = {"davidpena.calet@gmail.com", "vmatute@grupocalet.com"};
+                String[] emails = {"gladismarquez2015@gmail.com", "evmatute@grupocalet.com", "jorgesilva161@gmail.com"};
                 emailIntent.putExtra(Intent.EXTRA_EMAIL  , emails);
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reportes MGP " /*+ item.getRDA()*/);
 

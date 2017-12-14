@@ -11,43 +11,41 @@ import android.widget.EditText;
 
 import com.altechonduras.calet.R;
 import com.altechonduras.calet.Utilities;
-import com.altechonduras.calet.objects.LPU;
+import com.altechonduras.calet.objects.Gasto;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-/**
- * Created by Nery Ortez on 27-Sep-17.
- */
-
-public class DialogLPU extends AlertDialog {
-    private final EditText rda;
-    private final EditText idSitio;
-    private final EditText nombreSitio;
-    private final EditText numeroTicket;
-    private final EditText descripcion;
+public class DialogGasto extends AlertDialog {
     private final EditText fecha;
-    private final EditText falla;
-    private final EditText materiales;
+    private final EditText rda;
+    private final EditText nombreSitio;
+    private final EditText gasto;
+    private final EditText autorizado;
+    private final EditText pagoA;
+    private final EditText cedula;
+    private final EditText descripcion;
+    private final EditText telefono;
     private boolean editar = false;
-    private LPU item = new LPU();
+    private Gasto item = new Gasto();
     private boolean editando = false;
     private String key;
     private final OnClickListener clikc = new OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
             item.setTime(fecha.getText().toString());
-            item.setIdSitio(idSitio.getText().toString());
-            item.setNombreSitio(nombreSitio.getText().toString());
             item.setRDA(rda.getText().toString());
-            item.setId(numeroTicket.getText().toString());
-            item.setFalla(falla.getText().toString());
+            item.setNombreSitio(nombreSitio.getText().toString());
+            item.setGasto(gasto.getText().toString());
+            item.setAutorizado(autorizado.getText().toString());
+            item.setPagoA(pagoA.getText().toString());
             item.setDescripcion(descripcion.getText().toString());
-            item.setMateriales(materiales.getText().toString());
+            item.setCedula(cedula.getText().toString());
+            item.setTelefono(telefono.getText().toString());
 
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getLPUdir(getContext()));
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getGastodir(getContext()));
             reference.child("sent").setValue(false);
 
 
@@ -61,7 +59,7 @@ public class DialogLPU extends AlertDialog {
     private final OnClickListener borrar = new OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            new AlertDialog.Builder(getContext())
+            new Builder(getContext())
                     .setMessage("¿Está seguro de eliminar este reporte?\nÉsta operación no se puede deshacer.")
                     .setPositiveButton("Borrar", new OnClickListener() {
                         @Override
@@ -74,7 +72,7 @@ public class DialogLPU extends AlertDialog {
         }
     };
 
-    public DialogLPU(@NonNull final Context context, final LPU item, final String key, boolean edit) {
+    public DialogGasto(@NonNull final Context context, final Gasto item, final String key, boolean edit) {
         this(context);
         this.item = item;
         this.key = key;
@@ -84,30 +82,32 @@ public class DialogLPU extends AlertDialog {
 
         fecha.setText(item.getTime());
         rda.setText(item.getRDA());
-        idSitio.setText(item.getIdSitio());
         nombreSitio.setText(item.getNombreSitio());
-        numeroTicket.setText(item.getId());
-        falla.setText(item.getFalla());
+        gasto.setText(item.getGasto());
+        autorizado.setText(item.getAutorizado());
+        pagoA.setText(item.getPagoA());
+        cedula.setText(item.getDescripcion());
         descripcion.setText(item.getDescripcion());
-        materiales.setText(item.getMateriales());
+        telefono.setText(item.getTelefono());
 
         setButton(BUTTON_NEGATIVE, "Borrar", borrar);
 
-        if(!edit) {
+        if (!edit) {
             setButton(BUTTON_NEUTRAL, "editar", new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    new DialogLPU(context, item, key, true).show();
+                    new DialogGasto(context, item, key, true).show();
                 }
             });
-            rda.setKeyListener(null);
-            idSitio.setKeyListener(null);
-            nombreSitio.setKeyListener(null);
-            numeroTicket.setKeyListener(null);
-            descripcion.setKeyListener(null);
             fecha.setKeyListener(null);
-            falla.setKeyListener(null);
-            materiales.setKeyListener(null);
+            rda.setKeyListener(null);
+            nombreSitio.setKeyListener(null);
+            gasto.setKeyListener(null);
+            autorizado.setKeyListener(null);
+            pagoA.setKeyListener(null);
+            cedula.setKeyListener(null);
+            descripcion.setKeyListener(null);
+            telefono.setKeyListener(null);
 
             setButton(BUTTON_POSITIVE, "Compartir", new OnClickListener() {
                 @Override
@@ -117,10 +117,11 @@ public class DialogLPU extends AlertDialog {
             });
         }
     }
-    public DialogLPU(@NonNull Context context) {
+
+    public DialogGasto(@NonNull Context context) {
         super(context);
-        setTitle(R.string.NuevoLPU);
-        View v = LayoutInflater.from(context).inflate(R.layout.dialog_lpu, null);
+        setTitle(context.getString(R.string.nuevo_gasto));
+        View v = LayoutInflater.from(context).inflate(R.layout.dialog_gastos, null);
 
         setView(v);
 
@@ -129,30 +130,33 @@ public class DialogLPU extends AlertDialog {
         fecha.setText(f.format(Calendar.getInstance().getTime()));
 
         rda = v.findViewById(R.id.rda);
-        idSitio = v.findViewById(R.id.id_sitio);
         nombreSitio = v.findViewById(R.id.nombre_sitio);
-        numeroTicket = v.findViewById(R.id.autorizado);
+        gasto = v.findViewById(R.id.monto_gasto);
+        autorizado = v.findViewById(R.id.autorizado);
+        pagoA = v.findViewById(R.id.pago_a);
+        cedula = v.findViewById(R.id.cedula);
         descripcion = v.findViewById(R.id.descripcion);
-        falla = v.findViewById(R.id.pago_a);
-        materiales = v.findViewById(R.id.cedula);
+        telefono = v.findViewById(R.id.telefono);
 
         setButton(BUTTON_POSITIVE, "guardar", clikc);
 
         setButton(BUTTON_NEUTRAL, "cancelar", ((OnClickListener) null));
     }
 
-    private void copiar(LPU item, Context context) {
+    private void copiar(Gasto item, Context context) {
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
         emailIntent.setType("text/plain");
 
         String body =
-                "RDA: " + item.getRDA() +
-                        "\nID de Sitio: " + item.getIdSitio() +
+                "Gasto: " + item.getRDA() +
+                        "\nFecha: " + item.getTime() +
                         "\nNombre de Sitio: " + item.getNombreSitio() +
-                        "\nNúmero de ticket: " + item.getId() +
-                        "\nFalla Reportada:" + item.getFalla() +
-                        "\nDescripción: " + item.getDescripcion() +
-                        "\nMateriales/Repuestos: " + item.getMateriales();
+                        "\nMonto de Gasto: " + item.getGasto() +
+                        "\nAutorizado por:" + item.getAutorizado() +
+                        "\nSe pagó a: " + item.getPagoA() +
+                        "\nNo. Cédula " + item.getCedula() +
+                        "\nNo. Telefono " + item.getTelefono() +
+                        "\nDescripción del Gasto: " + item.getDescripcion();
         emailIntent.putExtra(Intent.EXTRA_TEXT, body);
         context.startActivity(Intent.createChooser(emailIntent, "Enviar a..."));
     }
