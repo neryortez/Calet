@@ -13,42 +13,47 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.altechonduras.calet.MainActivity;
 import com.altechonduras.calet.R;
 import com.altechonduras.calet.Utilities;
-import com.altechonduras.calet.dialogs.DialogLPU;
-import com.altechonduras.calet.objects.LPU;
-import com.altechonduras.calet.views.AdaptadorLPU;
-import com.google.firebase.auth.FirebaseAuth;
+import com.altechonduras.calet.dialogs.DialogReportes;
+import com.altechonduras.calet.views.AdaptadorReportes;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
-/**
- * Created by Nery Ortez on 27-Sep-17.
- */
+public class ActividadReportes extends AppCompatActivity {
 
-public class ActividadLPU extends AppCompatActivity {
-    private AdaptadorLPU mMyAdapter;
-    private com.google.firebase.database.Query mQuery;
+    private AdaptadorReportes mMyAdapter;
+    private Query mQuery;
     private ArrayList<String> mAdapterKeys;
-    private ArrayList<LPU> mAdapterItems;
+    private ArrayList<Map<String, Object>> mAdapterItems;
+    private String mReporteID;
+    private Map<String, Object> format;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mReporteID = getIntent().getStringExtra(MainActivity.REPORTE_ID);
+
         setContentView(R.layout.activity_actividad_mgp);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
-
-        mAdapterItems = new ArrayList<LPU>();
-        mAdapterKeys = new ArrayList<String>();
+        mAdapterItems = new ArrayList<>();
+        mAdapterKeys = new ArrayList<>();
 
 
         setupFirebase();
@@ -60,7 +65,7 @@ public class ActividadLPU extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new DialogLPU(ActividadLPU.this).show();
+                new DialogReportes(ActividadReportes.this, format).show();
             }
         });
 
@@ -88,22 +93,24 @@ public class ActividadLPU extends AppCompatActivity {
             }
 
             private void enviarPorCorreo(View view) {
-                ArrayList<LPU> items = mMyAdapter.getItems();
+                ArrayList<Map<String, Object>> items = mMyAdapter.getItems();
 
                 StringBuilder body = new StringBuilder("<html><body><br><table border=1>");
 
-                for (LPU item :
+                for (Map<String, Object> item :
                         items) {
                     body.append("<tr><td>")
-                            .append(item.getTime()).append("</td><td>")
-                            .append(item.getNombreSitio()).append("</td><td>")
+                            /*.append(item.getFecha()).append("</td><td>")
+                            .append(item.getFecha()).append("</td><td>")
                             .append(item.getIdSitio()).append("</td><td>")
+                            .append(item.getNombreSitio()).append("</td><td>")
                             .append(item.getRDA()).append("</td><td>")
                             .append(item.getId()).append("</td><td>")
-                            .append(FirebaseAuth.getInstance().getCurrentUser().getEmail()).append("</td><td>")
-                            .append(item.getFalla()).append("</td><td>")
-                            .append(item.getDescripcion()).append("</td><td>")
-                            .append(item.getMateriales()).append("</td></tr>");
+                            .append(item.getHoraInicio()).append("</td><td>")
+                            .append(item.getHoraFinal()).append("</td><td>")
+                            .append(item.getCombustible()).append("</td><td>")
+                            .append(item.getGastoAcarreo()).append("</td><td>")
+                            .append(item.getComentarios())*/.append("</td></tr>");
                 }
                 body.append("</table></body></html>");
 
@@ -126,9 +133,9 @@ public class ActividadLPU extends AppCompatActivity {
                 Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
                 emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
 
-                String[] emails = {"davidpena.calet@gmail.com", "vmatute@grupocalet.com"};
+                String[] emails = {"gladismarquez2015@gmail.com", "evmatute@grupocalet.com", "jorgesilva161@gmail.com"};
                 emailIntent.putExtra(Intent.EXTRA_EMAIL  , emails);
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reportes LPU " /*+ item.getRDA()*/);
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reportes Reporte " /*+ item.getRDA()*/);
 
                 emailIntent.putExtra(Intent.EXTRA_TEXT   , "Adjunto encontrará el archivo con los reportes\n\n--Realizado con G-CALET REPORTES\n\nALTECH");
                 emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
@@ -141,7 +148,7 @@ public class ActividadLPU extends AppCompatActivity {
 //                i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(body.toString()));
                 i.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
                 i.putExtra(Intent.EXTRA_EMAIL, emails);
-                i.putExtra(Intent.EXTRA_SUBJECT, "Reportes LPU " /*+ item.getRDA()*/);
+                i.putExtra(Intent.EXTRA_SUBJECT, "Reportes Reporte " /*+ item.getRDA()*/);
                 view.getContext().startActivity(Intent.createChooser(i, "Enviar por correo..."));
 
                 ((DatabaseReference) mMyAdapter.getQuery()).child("sent").setValue(true);
@@ -156,16 +163,30 @@ public class ActividadLPU extends AppCompatActivity {
     }
 
     private void setupFirebase() {
-        String firebaseLocation = Utilities.getLPUdir(getApplicationContext());
+        String firebaseLocation = Utilities.getMGPdir(getApplicationContext());
+
+        firebaseLocation = Utilities.getReporteID(mReporteID);
         mQuery = FirebaseDatabase.getInstance().getReference(firebaseLocation);
-        mQuery.keepSynced(true);
+        FirebaseDatabase.getInstance().getReference(Utilities.getFormatoReporte(mReporteID)).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                format = ((Map<String, Object>) dataSnapshot.getValue());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+        //TODO: keepSynced todo la Reference del gruop, para asi poder tener acceso sin conexion a los datos.
+        mQuery.keepSynced(true); //TODO: Eliminar...?
     }
 
     private void setupRecyclerview() {
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
-        mMyAdapter = new AdaptadorLPU(mQuery, mAdapterItems, mAdapterKeys);
+        mMyAdapter = new AdaptadorReportes(mQuery, mAdapterItems, mAdapterKeys, format);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mMyAdapter);
     }
+
 
 }

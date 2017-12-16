@@ -1,0 +1,218 @@
+package com.altechonduras.calet.dialogs;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.altechonduras.calet.R;
+import com.altechonduras.calet.Utilities;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by Nery Ortez on 27-Sep-17.
+ */
+
+public class DialogReportes extends AlertDialog {
+    private final ArrayList<String> keys;
+    private final Map<String, View> format = new HashMap<>();
+    private String key = "";
+    private final OnClickListener borrar = new OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            new AlertDialog.Builder(getContext())
+                    .setMessage("¿Está seguro de eliminar este reporte?\nÉsta operación no se puede deshacer.")
+                    .setPositiveButton("Borrar", new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext())).child(key).setValue(null);
+                        }
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        }
+    };
+    private boolean editando = false;
+    private Map<String, Object> item = new HashMap<>();
+    private final OnClickListener clikc = new OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            for (String s : format.keySet()) {
+                item.put(s, format.get(s));
+            }
+
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext()));
+            reference.child("sent").setValue(false);
+
+            if (!editando) {
+                reference.push().setValue(item);
+            } else {
+                reference.child(key).setValue(item);
+            }
+        }
+    };
+
+    public DialogReportes(@NonNull final Context context, final Map<String, Object> item, final String key, final Map<String, Object> mformat, boolean edit) {
+        this(context, mformat);
+        this.item = item;
+
+        for (String llave : mformat.keySet()) {
+            ((EditText) format.get(llave).findViewById(R.id.value)).setText(((String) item.get(llave)));
+        }
+
+        this.key = key;
+        editando = true;
+
+        setButton(BUTTON_NEGATIVE, "Borrar", borrar);
+
+        if(!edit) {
+            setButton(BUTTON_NEUTRAL, "editar", new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    new DialogReportes(context, item, key, mformat, true).show();
+                }
+            });
+            for (View view : format.values()) {
+                ((EditText) view.findViewById(R.id.value)).setKeyListener(null);
+            }
+
+            setButton(BUTTON_POSITIVE, "Compartir", new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    copiar(item, getContext());
+                }
+            });
+        }
+    }
+
+    public DialogReportes(@NonNull final Context context, Map<String, Object> mformat) {
+        super(context);
+        setTitle(R.string.NuevoMGP);
+
+        setTitle("Nuevo");
+        keys = new ArrayList<>();
+//        keys.addAll(mformat.keySet());
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        for (String key : mformat.keySet()) {
+            int id = 0;
+            keys.add(key);
+            switch (((String) mformat.get(key))) {
+                case "string":
+                    id = R.layout.type_string;
+                    break;
+                case "number":
+                    id = R.layout.type_number;
+                    break;
+                case "long_string":
+                    id = R.layout.type_long_string;
+                    break;
+                case "date":
+                    id = R.layout.type_date;
+                    break;
+                case "time":
+                    id = R.layout.type_time;
+                    break;
+                default:
+                    id = R.layout.type_string;
+            }
+            View view = inflater.inflate(id, null);
+            ((TextView) view.findViewById(R.id.key)).setText(key);
+            ((EditText) view.findViewById(R.id.value)).setHint(key);
+            layout.addView(view);
+            format.put(key, view);
+        }
+//        View v = inflater.inflate(R.layout.dialog_mgp, null);
+
+        setView(layout);
+
+//        fecha = v.findViewById(R.id.fecha);
+//        SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+//        fecha.setText(f.format(Calendar.getInstance().getTime()));
+//
+//        gastoAcarreo = v.findViewById(R.id.gastoAcarreo);
+//        comentarios = v.findViewById(R.id.comentarios);
+//        rda = v.findViewById(R.id.rda);
+//        idSitio = v.findViewById(R.id.id_sitio);
+//        nombreSitio = v.findViewById(R.id.nombre_sitio);
+//        numeroTicket = v.findViewById(R.id.autorizado);
+//        combustible = v.findViewById(R.id.combustible);
+//        horaInicio = v.findViewById(R.id.horaInicio);
+//        horaInicio.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Calendar mcurrentTime = Calendar.getInstance();
+//                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+//                int minute = mcurrentTime.get(Calendar.MINUTE);
+//                TimePickerDialog mTimePicker;
+//                mTimePicker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+//                    @Override
+//                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+//                        String text = selectedHour + ":" + (selectedMinute < 10 ? "0" : "") + selectedMinute;
+//                        horaInicio.setText(text);
+//                    }
+//                }, hour, minute, true);//Yes 24 hour time
+//                mTimePicker.setTitle("Select Time");
+//                mTimePicker.show();
+//            }
+//        });
+//
+//        horaFinal = v.findViewById(R.id.horaFinal);
+//        horaFinal.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Calendar mcurrentTime = Calendar.getInstance();
+//                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+//                int minute = mcurrentTime.get(Calendar.MINUTE);
+//                TimePickerDialog mTimePicker;
+//                mTimePicker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+//                    @Override
+//                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+//                        String text = selectedHour + ":" + (selectedMinute < 10 ? "0" : "") + selectedMinute;
+//                        horaFinal.setText( text );
+//                    }
+//                }, hour, minute, true);//Yes 24 hour time
+//                mTimePicker.setTitle("Select Time");
+//                mTimePicker.show();
+//            }
+//        });
+
+
+
+        setButton(BUTTON_POSITIVE, "guardar", clikc);
+
+        setButton(BUTTON_NEUTRAL, "cancelar", ((OnClickListener) null));
+
+    }
+
+    private void copiar(Map<String, Object> item, Context context) {
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setType("text/plain");
+
+        String body = "";
+//                "RDA: " + item.getRDA() +
+//                        "\nID de Sitio: " + item.getIdSitio() +
+//                        "\nNombre de Sitio: " + item.getNombreSitio() +
+//                        "\nNúmero de ticket: " + item.getId() +
+//                        "\nCombustible: " + item.getCombustible() +
+//                        "\nGasto Acarreo: " + item.getGastoAcarreo() +
+//                        "\nHora Inicial: " + item.getHoraInicio() +
+//                        "\nHora Final: " + item.getHoraFinal() +
+//                        "\nComentarios: " + item.getComentarios();
+        emailIntent.putExtra(Intent.EXTRA_TEXT, body);
+        context.startActivity(Intent.createChooser(emailIntent, "Enviar a..."));
+    }
+}

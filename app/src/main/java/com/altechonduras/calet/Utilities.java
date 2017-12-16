@@ -27,6 +27,9 @@ public class Utilities {
 
     }
 
+    public static String getUserUid() {
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+    }
     public static String getDevice(Context context) {
         String device = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(DEVICE, null);
         if (device == null) {
@@ -38,5 +41,15 @@ public class Utilities {
 
     public static void setDevice(String device, Context context) {
         context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(DEVICE, device).apply();
+    }
+
+    public static String getReporteID(String mReporteID) {
+        //TODO: traer reportes unicamente desde la (ref) perteneciente al grupo... Algo asi como:
+        return /*Utilities.getGroup() +*/ "tests" + "/data/" + Utilities.getUserUid() + "/" + mReporteID;
+
+    }
+
+    public static String getFormatoReporte(String mReporteID) {
+        return /*Utilities.getGroup() +*/ "tests" + "/reportes/" + mReporteID + "/format";
     }
 }

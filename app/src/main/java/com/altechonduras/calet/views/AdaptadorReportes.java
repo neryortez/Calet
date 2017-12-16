@@ -9,19 +9,24 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.altechonduras.calet.R;
-import com.altechonduras.calet.dialogs.DialogLPU;
-import com.altechonduras.calet.objects.LPU;
+import com.altechonduras.calet.dialogs.DialogReportes;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
+import java.util.Map;
 
-public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolder, LPU> {
-    public AdaptadorLPU(Query query, @Nullable ArrayList<LPU> items, @Nullable ArrayList<String> keys) {
+
+public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes.ViewHolder, Map<String, Object>> {
+
+    private final Map<String, Object> mformat;
+
+    public AdaptadorReportes(Query query, @Nullable ArrayList<Map<String, Object>> items, @Nullable ArrayList<String> keys, Map<String, Object> format) {
         super(query, items, keys);
+        mformat = format;
     }
 
     @Override
-    public AdaptadorLPU.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AdaptadorReportes.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item, parent, false);
 
@@ -29,31 +34,31 @@ public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(AdaptadorLPU.ViewHolder holder, int position) {
-        LPU item = getItem(position);
-        holder.textViewDescription.setText(item.getTime());
-        holder.textViewName.setText(item.getNombreSitio());
+    public void onBindViewHolder(AdaptadorReportes.ViewHolder holder, int position) {
+        Map<String, Object> item = getItem(position);
+        holder.textViewName.setText(item.get("name").toString());
+        holder.textViewDescription.setText(item.get("date").toString());
         holder.setItem(item);
         holder.setKey(getKeys().get(position));
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
-        private final Button mas;
+    class ViewHolder extends RecyclerView.ViewHolder {
+
         TextView textViewName;
         TextView textViewDescription;
-        private LPU item;
+        Button mas;
+        private Map<String, Object> item;
         private String key;
 
         ViewHolder(View view) {
             super(view);
-            textViewName = view.findViewById(R.id.name);
+            textViewName = view.findViewById(R.id.key);
             textViewDescription = view.findViewById(R.id.descripcion);
-
             mas = view.findViewById(R.id.mostrarMas);
             mas.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    new DialogLPU(view.getContext(), item, key, false).show();
+                    new DialogReportes(view.getContext(), item, key, mformat, false).show();
                 }
             });
 
@@ -62,6 +67,7 @@ public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolde
 //                public void onClick(View view) {
 //                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
 //                    emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
+////                    emailIntent.setType("message/rfc822");
 //
 //                    emailIntent.putExtra(Intent.EXTRA_EMAIL  , new String[]{"davidpena.calet@gmail.com", "vmatute@grupocalet.com"});
 //                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reporte: " + item.getRDA());
@@ -71,7 +77,9 @@ public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolde
 //                                    "\nID de Sitio: " + item.getGasto() +
 //                                    "\nNombre de Sitio: " + item.getNombreSitio() +
 //                                    "\nNúmero de ticket: " + item.getAutorizado() +
-//                                    "\nDescripción: " + item.getDescripcion();
+//                                    "\nCombustible: $" + item.getCombustible() +
+//                                    "\nHora Inicio: " + item.getHoraInicio() +
+//                                    "\nHora Final: " + item.getHoraFinal();
 //                    emailIntent.putExtra(Intent.EXTRA_TEXT   , body);
 //
 //                    view.getContext().startActivity(emailIntent);
@@ -79,13 +87,12 @@ public class AdaptadorLPU extends FirebaseRecyclerAdapter<AdaptadorLPU.ViewHolde
 //            });
         }
 
-        void setItem(LPU item) {
+        public void setItem(Map item) {
             this.item = item;
         }
 
-        void setKey(String key) {
+        public void setKey(String key) {
             this.key = key;
         }
     }
-
 }
