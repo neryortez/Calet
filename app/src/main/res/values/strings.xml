@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">G-Calet</string>
     <string name="bienvenida">Bienvenido a la APP \nPara reportes de Grupo CALET</string>
-    <string name="title_activity_actividad_mgp">Reportes MGP</string>
+    <string name="title_activity_actividad_mgp">Reportes</string>
     <string name="mgp_location">mgp</string>
     <string name="title_activity_actividad_lpu">Reportes LPU</string>
     <string name="lpu_location">lpu</string>

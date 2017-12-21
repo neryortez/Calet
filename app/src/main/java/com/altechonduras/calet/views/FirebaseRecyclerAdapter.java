@@ -1,15 +1,18 @@
 package com.altechonduras.calet.views;
+
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.altechonduras.calet.MainActivity;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
@@ -314,8 +317,21 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      * @param snapshot Result
      * @return Data converted
      */
+    @SuppressWarnings("unchecked")
     protected T getConvertedObject(DataSnapshot snapshot) {
-        return snapshot.getValue(getGenericClass());
+        T result = null;
+        try {
+            result = snapshot.getValue(getGenericClass());
+        } catch (Exception e){
+            result = (T) snapshot.getValue(MainActivity.genericTypeIndicator);
+        }
+        return result;
+    }
+
+    private Type getGenericType() {
+        return ((ParameterizedType) this.getClass()
+                .getGenericSuperclass())
+                .getActualTypeArguments()[1];
     }
 
     /**
@@ -323,7 +339,9 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
      */
     @SuppressWarnings("unchecked")
     private Class<T> getGenericClass() {
-        return (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[1];
+        return (Class<T>) ((ParameterizedType) this.getClass()
+                .getGenericSuperclass())
+                .getActualTypeArguments()[1];
     }
 
 }

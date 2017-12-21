@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -48,12 +49,15 @@ public class LoginActivity extends AppCompatActivity {
     private View mProgressView;
     private View mLoginFormView;
     private FirebaseDatabase database;
+    private TextInputEditText mGrupoView;
+    private String grupo = "";
 
     @Override
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        grupo = Utilities.getGrupo(this);
         updateUI(currentUser);
     }
 
@@ -94,14 +98,19 @@ public class LoginActivity extends AppCompatActivity {
                 Snackbar.make(mEmailView, "Ocurrió un error. Por favor intentelo otra vez", Snackbar.LENGTH_LONG).show();
             }
         } else {
-            database.getReference("users").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            database.getReference(grupo + "/users").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
+                    if (grupo.isEmpty()) {
+                        mAuth.signOut();
+                        return;
+                    }
                     checkIfThisDeviceLogged(FirebaseAuth.getInstance().getCurrentUser(), snapshot);
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "onCancelled: " + databaseError.getMessage());
                 }
             });
         }
@@ -164,6 +173,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        mGrupoView = (TextInputEditText) findViewById(R.id.groupcode);
+        mGrupoView.setText(Utilities.getGrupo(this));
+
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -187,6 +199,10 @@ public class LoginActivity extends AppCompatActivity {
 //            return;
 //        }
 
+        grupo = mGrupoView.getText().toString();
+        if(grupo.isEmpty()) {
+            Snackbar.make(mGrupoView, "Ingrese el nombre del grupo", Snackbar.LENGTH_LONG).show();
+        }
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -237,9 +253,15 @@ public class LoginActivity extends AppCompatActivity {
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d(TAG, "signInWithEmail:success");
                                 final FirebaseUser user = task.getResult().getUser();
-                                database.getReference("/users/" + user.getUid())
+                                database.getReference(grupo + "/users/" + user.getUid())
                                         .addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override public void onDataChange(DataSnapshot dataSnapshot) {
+                                                if (!dataSnapshot.exists()) {
+                                                    Snackbar.make(mGrupoView, grupo + " no existe.", Snackbar.LENGTH_LONG).show();
+                                                    FirebaseAuth.getInstance().signOut();
+                                                }
+                                                Utilities.saveGrupo(grupo, LoginActivity.this);
+
                                                 if (dataSnapshot.exists()) {
                                                     checkIfThisDeviceLogged(user, dataSnapshot);
 //                                                    User frUser = dataSnapshot.getValue(User.class);
@@ -267,7 +289,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 }
                                             }
                                             @Override public void onCancelled(DatabaseError databaseError) {
-
+                                                Log.e(TAG, "onCancelled: " + databaseError.getMessage());
                                             }
                                         });
                             } else {

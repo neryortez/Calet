@@ -10,19 +10,22 @@ import android.widget.TextView;
 
 import com.altechonduras.calet.R;
 import com.altechonduras.calet.dialogs.DialogReportes;
+import com.altechonduras.calet.objects.Reporte;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 
-public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes.ViewHolder, Map<String, Object>> {
+public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes.ViewHolder, HashMap<String, Object>> {
 
-    private final Map<String, Object> mformat;
+    private final String ref;
+    private Reporte reporte;
 
-    public AdaptadorReportes(Query query, @Nullable ArrayList<Map<String, Object>> items, @Nullable ArrayList<String> keys, Map<String, Object> format) {
+    public AdaptadorReportes(Query query, @Nullable ArrayList<HashMap<String, Object>> items, @Nullable ArrayList<String> keys, final String ref) {
         super(query, items, keys);
-        mformat = format;
+        this.ref = ref;
     }
 
     @Override
@@ -35,11 +38,15 @@ public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes
 
     @Override
     public void onBindViewHolder(AdaptadorReportes.ViewHolder holder, int position) {
-        Map<String, Object> item = getItem(position);
-        holder.textViewName.setText(item.get("name").toString());
-        holder.textViewDescription.setText(item.get("date").toString());
+        HashMap<String, Object> item = (getItem(position));
+         holder.textViewName.setText((CharSequence) item.get(reporte.getOrder().get(0)));
+        holder.textViewDescription.setText((reporte.isMostrarSegundo()) ? item.values().toArray()[1].toString() : "");
         holder.setItem(item);
         holder.setKey(getKeys().get(position));
+    }
+
+    public void setReporte(Reporte reporte) {
+        this.reporte = reporte;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -58,7 +65,7 @@ public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes
             mas.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    new DialogReportes(view.getContext(), item, key, mformat, false).show();
+                    new DialogReportes(view.getContext(), item, (ref), key, reporte, false).show();
                 }
             });
 

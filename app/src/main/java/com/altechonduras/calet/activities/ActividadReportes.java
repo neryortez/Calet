@@ -17,6 +17,7 @@ import com.altechonduras.calet.MainActivity;
 import com.altechonduras.calet.R;
 import com.altechonduras.calet.Utilities;
 import com.altechonduras.calet.dialogs.DialogReportes;
+import com.altechonduras.calet.objects.Reporte;
 import com.altechonduras.calet.views.AdaptadorReportes;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,16 +31,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ActividadReportes extends AppCompatActivity {
 
     private AdaptadorReportes mMyAdapter;
     private Query mQuery;
-    private ArrayList<String> mAdapterKeys;
-    private ArrayList<Map<String, Object>> mAdapterItems;
     private String mReporteID;
-    private Map<String, Object> format;
+    private ArrayList<String> orden;
+    private Reporte reporte;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +52,10 @@ public class ActividadReportes extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        mAdapterItems = new ArrayList<>();
-        mAdapterKeys = new ArrayList<>();
-
+//        mAdapterItems = new ArrayList<>();
+//        mAdapterKeys = new ArrayList<>();
 
         setupFirebase();
-        setupRecyclerview();
 
 
 
@@ -65,7 +63,7 @@ public class ActividadReportes extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new DialogReportes(ActividadReportes.this, format).show();
+                new DialogReportes(ActividadReportes.this, Utilities.getReportData(mReporteID, ActividadReportes.this), reporte).show();
             }
         });
 
@@ -83,7 +81,6 @@ public class ActividadReportes extends AppCompatActivity {
                     else if (checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED) {
                         requestPermissions(new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 138);
                         return;
-
                     } else {
                         enviarPorCorreo(view);
                     }
@@ -93,26 +90,19 @@ public class ActividadReportes extends AppCompatActivity {
             }
 
             private void enviarPorCorreo(View view) {
-                ArrayList<Map<String, Object>> items = mMyAdapter.getItems();
+                ArrayList<HashMap<String, Object>> items = mMyAdapter.getItems();
 
-                StringBuilder body = new StringBuilder("<html><body><br><table border=1>");
+                StringBuilder body = new StringBuilder("<br><table border=1>");
 
                 for (Map<String, Object> item :
                         items) {
-                    body.append("<tr><td>")
-                            /*.append(item.getFecha()).append("</td><td>")
-                            .append(item.getFecha()).append("</td><td>")
-                            .append(item.getIdSitio()).append("</td><td>")
-                            .append(item.getNombreSitio()).append("</td><td>")
-                            .append(item.getRDA()).append("</td><td>")
-                            .append(item.getId()).append("</td><td>")
-                            .append(item.getHoraInicio()).append("</td><td>")
-                            .append(item.getHoraFinal()).append("</td><td>")
-                            .append(item.getCombustible()).append("</td><td>")
-                            .append(item.getGastoAcarreo()).append("</td><td>")
-                            .append(item.getComentarios())*/.append("</td></tr>");
+                    body.append("<tr>");
+                    for (Object s : item.keySet().toArray()) {
+                        body.append("<td>").append(item.get(s)).append("</td>");
+                    }
+                    body.append("</tr>");
                 }
-                body.append("</table></body></html>");
+                body.append("</table>");
 
                 FileOutputStream fos = null;
                 File file = new File(Environment.getExternalStorageDirectory().toString() + "/" + "abc.html");
@@ -131,9 +121,10 @@ public class ActividadReportes extends AppCompatActivity {
                     }
                 }
                 Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
+                emailIntent.setData(Uri.parse(reporte.getRecipientes().get(0)/*"mailto:davidpena.calet@gmail.com"*/));
 
-                String[] emails = {"gladismarquez2015@gmail.com", "evmatute@grupocalet.com", "jorgesilva161@gmail.com"};
+                String[] emails = {};
+                emails = reporte.getRecipientes().toArray(emails);// {"gladismarquez2015@gmail.com", "evmatute@grupocalet.com", "jorgesilva161@gmail.com"};
                 emailIntent.putExtra(Intent.EXTRA_EMAIL  , emails);
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reportes Reporte " /*+ item.getRDA()*/);
 
@@ -163,27 +154,33 @@ public class ActividadReportes extends AppCompatActivity {
     }
 
     private void setupFirebase() {
-        String firebaseLocation = Utilities.getMGPdir(getApplicationContext());
+        String firebaseLocation = "";
 
-        firebaseLocation = Utilities.getReporteID(mReporteID);
-        mQuery = FirebaseDatabase.getInstance().getReference(firebaseLocation);
-        FirebaseDatabase.getInstance().getReference(Utilities.getFormatoReporte(mReporteID)).addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseLocation = Utilities.getReportData(mReporteID, this);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        mQuery = database.getReference(firebaseLocation);
+
+        database.getReference(Utilities.getFormatoReporte(mReporteID, this)).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                format = ((Map<String, Object>) dataSnapshot.getValue());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+                reporte = dataSnapshot.getValue(Reporte.class);
+//                setupRecyclerview();
+                setTitle(reporte.getName() != null ? reporte.getName() : "Reporte");
+                RecyclerView recyclerView = findViewById(R.id.recyclerview);
+                mMyAdapter = new AdaptadorReportes(mQuery, new ArrayList<HashMap<String, Object>>(), new ArrayList<String>(), Utilities.getReportData(mReporteID, ActividadReportes.this));
+                mMyAdapter.setReporte(reporte);
+                recyclerView.setLayoutManager(new LinearLayoutManager(ActividadReportes.this));
+                recyclerView.setAdapter(mMyAdapter);
+            } @Override public void onCancelled(DatabaseError databaseError) {}
         });
+
         //TODO: keepSynced todo la Reference del gruop, para asi poder tener acceso sin conexion a los datos.
         mQuery.keepSynced(true); //TODO: Eliminar...?
     }
 
     private void setupRecyclerview() {
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
-        mMyAdapter = new AdaptadorReportes(mQuery, mAdapterItems, mAdapterKeys, format);
+        mMyAdapter = new AdaptadorReportes(mQuery, new ArrayList<HashMap<String, Object>>(), new ArrayList<String>(), Utilities.getReportData(mReporteID, this));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mMyAdapter);
     }

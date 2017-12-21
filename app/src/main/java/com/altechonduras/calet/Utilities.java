@@ -13,19 +13,7 @@ import java.util.UUID;
 public class Utilities {
     private static final String PREFERENCES = "preferences";
     private static final String DEVICE = "device";
-    public static String getMGPdir(Context context) {
-        return context.getString(R.string.mgp_location) + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid();
-    }
-
-    public static String getLPUdir(Context context) {
-        return context.getString(R.string.lpu_location) + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-    }
-
-    public static String getGastodir(Context context) {
-        return context.getString(R.string.gasto_location) + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-    }
+    private static final String GRUPO = "grupo";
 
     public static String getUserUid() {
         return FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -43,13 +31,29 @@ public class Utilities {
         context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(DEVICE, device).apply();
     }
 
-    public static String getReporteID(String mReporteID) {
+    public static String getReportData(String mReporteID, Context c) {
         //TODO: traer reportes unicamente desde la (ref) perteneciente al grupo... Algo asi como:
-        return /*Utilities.getGroup() +*/ "tests" + "/data/" + Utilities.getUserUid() + "/" + mReporteID;
+        return Utilities.getGroup(c)  + "/data/" + Utilities.getUserUid() + "/" + mReporteID;
 
     }
 
-    public static String getFormatoReporte(String mReporteID) {
-        return /*Utilities.getGroup() +*/ "tests" + "/reportes/" + mReporteID + "/format";
+    public static String getFormatoReporte(String mReporteID, Context c) {
+        return Utilities.getGroup(c) + "/reportes/" + mReporteID;
+    }
+
+    public static String getOrdenReporte(String mReporteID, Context c) {
+        return Utilities.getGroup(c) + "/reportes/" + mReporteID + "/order";
+    }
+
+    public static void saveGrupo(String grupo, Context context) {
+        context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(GRUPO, grupo).apply();
+    }
+
+    public static String getGrupo(Context context) {
+        return context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(GRUPO, null);
+    }
+
+    public static String getGroup(Context context) {
+        return getGrupo(context);
     }
 }

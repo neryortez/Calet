@@ -4,19 +4,22 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.ScrollView;
 
 import com.altechonduras.calet.R;
-import com.altechonduras.calet.Utilities;
+import com.altechonduras.calet.objects.Reporte;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +28,9 @@ import java.util.Map;
  */
 
 public class DialogReportes extends AlertDialog {
-    private final ArrayList<String> keys;
-    private final Map<String, View> format = new HashMap<>();
+    private final Map<String, View> viewsMap = new HashMap<>();
+    private final String ref;
+    private final Reporte reporte;
     private String key = "";
     private final OnClickListener borrar = new OnClickListener() {
         @Override
@@ -36,7 +40,7 @@ public class DialogReportes extends AlertDialog {
                     .setPositiveButton("Borrar", new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext())).child(key).setValue(null);
+                            FirebaseDatabase.getInstance().getReference(ref).child(key).setValue(null);
                         }
                     })
                     .setNegativeButton("Cancelar", null)
@@ -44,15 +48,15 @@ public class DialogReportes extends AlertDialog {
         }
     };
     private boolean editando = false;
-    private Map<String, Object> item = new HashMap<>();
+    private Map<String, Object> item = new HashMap<String, Object>();
     private final OnClickListener clikc = new OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            for (String s : format.keySet()) {
-                item.put(s, format.get(s));
+            for (String s : viewsMap.keySet()) {
+                item.put(s, ((TextInputLayout) viewsMap.get(s).findViewById(R.id.key)).getEditText().getText().toString());
             }
 
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(Utilities.getMGPdir(getContext()));
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference(ref);
             reference.child("sent").setValue(false);
 
             if (!editando) {
@@ -63,12 +67,14 @@ public class DialogReportes extends AlertDialog {
         }
     };
 
-    public DialogReportes(@NonNull final Context context, final Map<String, Object> item, final String key, final Map<String, Object> mformat, boolean edit) {
-        this(context, mformat);
+    public DialogReportes(@NonNull final Context context, final Map<String, Object> item,
+                          final String referencia, final String key, final Reporte reporte, boolean edit) {
+
+        this(context, referencia, reporte);
         this.item = item;
 
-        for (String llave : mformat.keySet()) {
-            ((EditText) format.get(llave).findViewById(R.id.value)).setText(((String) item.get(llave)));
+        for (String llave : reporte.getFormat().keySet()) {
+            ((TextInputEditText) viewsMap.get(llave).findViewById(R.id.value)).setText(((String) item.get(llave)));
         }
 
         this.key = key;
@@ -80,10 +86,10 @@ public class DialogReportes extends AlertDialog {
             setButton(BUTTON_NEUTRAL, "editar", new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    new DialogReportes(context, item, key, mformat, true).show();
+                    new DialogReportes(context, item, ref, key, reporte, true).show();
                 }
             });
-            for (View view : format.values()) {
+            for (View view : viewsMap.values()) {
                 ((EditText) view.findViewById(R.id.value)).setKeyListener(null);
             }
 
@@ -96,21 +102,23 @@ public class DialogReportes extends AlertDialog {
         }
     }
 
-    public DialogReportes(@NonNull final Context context, Map<String, Object> mformat) {
+    public DialogReportes(@NonNull final Context context, String referencia, Reporte reporte) {
         super(context);
         setTitle(R.string.NuevoMGP);
-
+        this.ref = referencia;
+        this.reporte = reporte;
         setTitle("Nuevo");
-        keys = new ArrayList<>();
 //        keys.addAll(mformat.keySet());
 
+
         LayoutInflater inflater = LayoutInflater.from(context);
+        ScrollView scrollView = new ScrollView(context);
         LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
-        for (String key : mformat.keySet()) {
+        scrollView.addView(layout);
+        for (String key : reporte.getOrder()) {
             int id = 0;
-            keys.add(key);
-            switch (((String) mformat.get(key))) {
+            switch (((String) reporte.getFormat().get(key))) {
                 case "string":
                     id = R.layout.type_string;
                     break;
@@ -126,22 +134,28 @@ public class DialogReportes extends AlertDialog {
                 case "time":
                     id = R.layout.type_time;
                     break;
+                case "money":
+                    id = R.layout.type_money;
+                    break;
                 default:
                     id = R.layout.type_string;
             }
             View view = inflater.inflate(id, null);
-            ((TextView) view.findViewById(R.id.key)).setText(key);
-            ((EditText) view.findViewById(R.id.value)).setHint(key);
+            if (id == R.layout.type_date) {
+                SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+                ((TextInputEditText) view.findViewById(R.id.value)).setText(f.format(Calendar.getInstance().getTime()));
+            }
+            ((TextInputLayout) view.findViewById(R.id.key)).setHint(key);
             layout.addView(view);
-            format.put(key, view);
+            viewsMap.put(key, view);
         }
 //        View v = inflater.inflate(R.layout.dialog_mgp, null);
 
-        setView(layout);
+        setView(scrollView);
 
 //        fecha = v.findViewById(R.id.fecha);
 //        SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-//        fecha.setText(f.format(Calendar.getInstance().getTime()));
+//        fecha.setText(f.viewsMap(Calendar.getInstance().getTime()));
 //
 //        gastoAcarreo = v.findViewById(R.id.gastoAcarreo);
 //        comentarios = v.findViewById(R.id.comentarios);
@@ -202,7 +216,10 @@ public class DialogReportes extends AlertDialog {
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
         emailIntent.setType("text/plain");
 
-        String body = "";
+        StringBuilder body = new StringBuilder();
+        for (String s : reporte.getOrder()) {
+            body.append("\n").append(s).append(": ").append(item.get(s));
+        }
 //                "RDA: " + item.getRDA() +
 //                        "\nID de Sitio: " + item.getIdSitio() +
 //                        "\nNombre de Sitio: " + item.getNombreSitio() +
@@ -212,7 +229,7 @@ public class DialogReportes extends AlertDialog {
 //                        "\nHora Inicial: " + item.getHoraInicio() +
 //                        "\nHora Final: " + item.getHoraFinal() +
 //                        "\nComentarios: " + item.getComentarios();
-        emailIntent.putExtra(Intent.EXTRA_TEXT, body);
+        emailIntent.putExtra(Intent.EXTRA_TEXT, body.toString());
         context.startActivity(Intent.createChooser(emailIntent, "Enviar a..."));
     }
 }
