@@ -1,4 +1,4 @@
-package com.altechonduras.calet.objects;
+package com.altechonduras.reportes.objects;
 
 import android.support.annotation.Keep;
 

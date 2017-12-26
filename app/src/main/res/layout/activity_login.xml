@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.altechonduras.calet.LoginActivity">
+    tools:context="com.altechonduras.reportes.LoginActivity">
 
     <!-- Login progress -->
     <ProgressBar
@@ -88,9 +87,15 @@
         </LinearLayout>
 
     </ScrollView>
+
     <ImageView
         android:id="@+id/imageView3"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <CheckedTextView
+        android:id="@+id/checkedTextView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/calet_fondo" />
+        android:text="Bienvenido a la version beta de Reports de Altech. \nAsegurese de tener acceso a la plataforma para crear y modificar la plantilla de sus reportes. " />
 </LinearLayout>

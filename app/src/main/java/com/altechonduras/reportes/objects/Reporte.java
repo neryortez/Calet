@@ -1,4 +1,4 @@
-package com.altechonduras.calet.objects;
+package com.altechonduras.reportes.objects;
 
 import android.support.annotation.Keep;
 
@@ -18,6 +18,7 @@ public class Reporte {
     private ArrayList<String> order;
     private ArrayList<String> recipientes;
     private boolean mostrarSegundo;
+    private HashMap<String, ArrayList<String>> multiples;
 
     public Reporte(){}
 
@@ -83,5 +84,13 @@ public class Reporte {
 
     public void setMostrarSegundo(boolean mostrarSegundo) {
         this.mostrarSegundo = mostrarSegundo;
+    }
+
+    public HashMap<String,ArrayList<String>> getMultiples() {
+        return multiples;
+    }
+
+    public void setMultiples(HashMap<String, ArrayList<String>> multiples) {
+        this.multiples = multiples;
     }
 }

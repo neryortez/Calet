@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">G-Calet</string>
+    <string name="app_name">Reports</string>
     <string name="bienvenida">Bienvenido a la APP \nPara reportes de Grupo CALET</string>
     <string name="title_activity_actividad_mgp">Reportes</string>
     <string name="mgp_location">mgp</string>
@@ -7,7 +7,7 @@
     <string name="lpu_location">lpu</string>
     <string name="NuevoLPU">Nuevo LPU</string>
     <string name="NuevoMGP">Nuevo MGP</string>
-    <string name="title_activity_login">G-Calet</string>
+    <string name="title_activity_login">Reports</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Correo</string>

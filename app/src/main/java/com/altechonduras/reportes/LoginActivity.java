@@ -1,4 +1,4 @@
-package com.altechonduras.calet;
+package com.altechonduras.reportes;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -24,7 +24,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.altechonduras.calet.objects.User;
+import com.altechonduras.reportes.objects.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -117,8 +117,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void escribirDatosDeUsuario(User user, FirebaseUser currentUser, DataSnapshot dataSnapshot) {
-        user.setDevice(Utilities.getDevice(this));
-        user.setEmail(currentUser.getEmail());
+//        user.setDevice(Utilities.getDevice(this));
+//        user.setEmail(currentUser.getEmail());
         dataSnapshot.getRef().setValue(user);
     }
 

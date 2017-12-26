@@ -1,18 +1,23 @@
-package com.altechonduras.calet;
+package com.altechonduras.reportes;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.altechonduras.calet.activities.ActividadReportes;
+import com.altechonduras.reportes.activities.ActividadReportes;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +28,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +47,34 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener delete = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                    .setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setMessage("Por favor confirme nuevamente")
+                                    .setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            for (Object reporte : reportes.values()) {
+                                                String location = Utilities.getReportData((String) ((HashMap) reporte).get("id"),
+                                                        MainActivity.this);
+                                                FirebaseDatabase.getInstance().getReference(location).setValue(null);
+                                            }
+
+                                        }
+                                    })
+                                    .setNegativeButton("Cancelar", null)
+                                    .setTitle("Alerta!")
+                                    .show();
+                        }
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .setTitle("Alerta!")
+                    .setMessage("La siguiente operación eliminará TODOS los reportes guardados, tanto de LPU como de Reporte." +
+                            "\nEsta operación no se puede deshacer.")
+                    .create();
+            dialog.show();
 
 
 //            mDatabase.getReference(Utilities.getGroup(MainActivity.this) + "/data/" + Utilities.getUserUid()).addValueEventListener(new ValueEventListener() {
@@ -156,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
 
         grupo = Utilities.getGrupo(MainActivity.this);
+        ((TextView) findViewById(R.id.textView)).setText("Bienvenido a la APP para Reportes de: " + grupo);
 
         botones = findViewById(R.id.lista_botones);
         mDatabase.getReference().child(grupo).child("reportes").addValueEventListener(new ValueEventListener() {
@@ -213,7 +251,11 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton("Cerrar Sesión", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                FirebaseDatabase.getInstance().getReference("/users/" + mAuth.getCurrentUser().getUid())
+                                FirebaseDatabase.getInstance()
+                                        .getReference(Utilities.getGroup(MainActivity.this)
+                                                + "/users/"
+                                                + mAuth.getCurrentUser().getUid()
+                                        )
                                         .child("device").setValue(null)
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
@@ -244,6 +286,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ((TextView) findViewById(R.id.user)).setText("Usuario: " + mAuth.getCurrentUser().getEmail());
+
+//        new LoadImage((ImageView) findViewById(R.id.imageView))
+//                .execute("https://firebasestorage.googleapis.com/v0/b/calet-dc66e.appspot.com/o/22548619_729583130575410_1715317472784384981_o%20(1).jpg?alt=media&token=c614227b-73a1-4c6b-825e-52ac8b8c68ad");
     }
 
     @Override
@@ -320,6 +365,79 @@ public class MainActivity extends AppCompatActivity {
 //        if (tempData.exists()) {
 //            tempData.delete();
 //        }
+    }
+
+    // show The Image in a ImageView
+
+
+//    public void onClick(View v) {
+//        startActivity(new Intent(this, IndexActivity.class));
+//        finish();
+//
+//    }
+
+    class LoadImage extends AsyncTask<String, Void, Bitmap> {
+
+        private final WeakReference<ImageView> imageViewReference;
+
+        public LoadImage(ImageView imageView) {
+            imageViewReference = new WeakReference<>(imageView);
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            try {
+                return downloadBitmap(params[0]);
+            } catch (Exception e) {
+                Log.e("LoadImage class", "doInBackground() " + e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (isCancelled()) {
+                bitmap = null;
+            }
+
+            if (imageViewReference != null) {
+                ImageView imageView = imageViewReference.get();
+                if (imageView != null) {
+                    if (bitmap != null) {
+                        imageView.setImageBitmap(bitmap);
+                    }
+                }
+            }
+        }
+
+        private Bitmap downloadBitmap(String url) {
+            HttpURLConnection urlConnection = null;
+            try {
+                Log.e("LoadImage class", "Descargando imagen desde url: " + url);
+                URL uri = new URL(url);
+                urlConnection = (HttpURLConnection) uri.openConnection();
+                int statusCode = urlConnection.getResponseCode();
+                if (statusCode != HttpURLConnection.HTTP_OK) {
+                    Log.e("LoadImage class", "No paso nada: " + statusCode);
+                    return null;
+                }
+
+                InputStream inputStream = urlConnection.getInputStream();
+                if (inputStream != null) {
+                    Log.e("LoadImage class", "InpuStream no nulo");
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    return bitmap;
+                }
+            } catch (Exception e) {
+                urlConnection.disconnect();
+                Log.e("LoadImage class", "Error en url: " + url);
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+            return null;
+        }
     }
 
 }

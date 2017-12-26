@@ -1,6 +1,6 @@
 /b
 # Created by https://www.gitignore.io/api/android,androidstudio
-
+google-services.json
 ### Android ###
 # Built application files
 *.apk

@@ -1,20 +1,21 @@
-package com.altechonduras.calet.dialogs;
+package com.altechonduras.reportes.dialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-import com.altechonduras.calet.R;
-import com.altechonduras.calet.objects.Reporte;
+import com.altechonduras.reportes.R;
+import com.altechonduras.reportes.objects.Reporte;
+import com.altechonduras.reportes.views.MultipleView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -52,8 +53,13 @@ public class DialogReportes extends AlertDialog {
     private final OnClickListener clikc = new OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
+            item = new HashMap<>();
             for (String s : viewsMap.keySet()) {
-                item.put(s, ((TextInputLayout) viewsMap.get(s).findViewById(R.id.key)).getEditText().getText().toString());
+                if (reporte.getFormat().get(s).equals("multiple")) {
+                    item.put(s, ((MultipleView) viewsMap.get(s)).getMapValues());
+                } else {
+                    item.put(s, ((TextInputLayout) viewsMap.get(s).findViewById(R.id.key)).getEditText().getText().toString());
+                }
             }
 
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference(ref);
@@ -74,7 +80,13 @@ public class DialogReportes extends AlertDialog {
         this.item = item;
 
         for (String llave : reporte.getFormat().keySet()) {
-            ((TextInputEditText) viewsMap.get(llave).findViewById(R.id.value)).setText(((String) item.get(llave)));
+            if (reporte.getFormat().get(llave).equals("multiple")) {
+                if (item.get(llave) instanceof HashMap) {
+                    ((MultipleView) viewsMap.get(llave)).setValues(((HashMap) item.get(llave)));
+                }
+            } else {
+                ((TextInputEditText) viewsMap.get(llave).findViewById(R.id.value)).setText(((String) item.get(llave)));
+            }
         }
 
         this.key = key;
@@ -90,7 +102,11 @@ public class DialogReportes extends AlertDialog {
                 }
             });
             for (View view : viewsMap.values()) {
-                ((EditText) view.findViewById(R.id.value)).setKeyListener(null);
+                if (view instanceof ConstraintLayout) {
+                    ((TextInputEditText) view.findViewById(R.id.value)).setKeyListener(null);
+                } else if (view instanceof MultipleView){
+                    ((MultipleView) view).setEnabled(false);
+                }
             }
 
             setButton(BUTTON_POSITIVE, "Compartir", new OnClickListener() {
@@ -118,7 +134,7 @@ public class DialogReportes extends AlertDialog {
         scrollView.addView(layout);
         for (String key : reporte.getOrder()) {
             int id = 0;
-            switch (((String) reporte.getFormat().get(key))) {
+            switch (reporte.getFormat().get(key)) {
                 case "string":
                     id = R.layout.type_string;
                     break;
@@ -137,6 +153,9 @@ public class DialogReportes extends AlertDialog {
                 case "money":
                     id = R.layout.type_money;
                     break;
+                case "multiple":
+                    id = R.layout.type_multiple;
+                    break;
                 default:
                     id = R.layout.type_string;
             }
@@ -145,7 +164,13 @@ public class DialogReportes extends AlertDialog {
                 SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
                 ((TextInputEditText) view.findViewById(R.id.value)).setText(f.format(Calendar.getInstance().getTime()));
             }
-            ((TextInputLayout) view.findViewById(R.id.key)).setHint(key);
+            if(id == R.layout.type_multiple){
+                view = new MultipleView(context)
+                        .setKeys(reporte.getMultiples().get(key))
+                        .setKey(key);
+            } else {
+                ((TextInputLayout) view.findViewById(R.id.key)).setHint(key);
+            }
             layout.addView(view);
             viewsMap.put(key, view);
         }

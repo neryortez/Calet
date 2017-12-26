@@ -1,4 +1,4 @@
-package com.altechonduras.calet.activities;
+package com.altechonduras.reportes.activities;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,12 +13,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.altechonduras.calet.MainActivity;
-import com.altechonduras.calet.R;
-import com.altechonduras.calet.Utilities;
-import com.altechonduras.calet.dialogs.DialogReportes;
-import com.altechonduras.calet.objects.Reporte;
-import com.altechonduras.calet.views.AdaptadorReportes;
+import com.altechonduras.reportes.MainActivity;
+import com.altechonduras.reportes.R;
+import com.altechonduras.reportes.Utilities;
+import com.altechonduras.reportes.dialogs.DialogReportes;
+import com.altechonduras.reportes.objects.Reporte;
+import com.altechonduras.reportes.views.AdaptadorReportes;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;

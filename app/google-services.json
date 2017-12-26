@@ -15,10 +15,62 @@
       },
       "oauth_client": [
         {
+          "client_id": "649477859645-3bpeg85cvrod1jmlq5cs3fvelfhq6998.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.altechonduras.calet",
+            "certificate_hash": "93fd11dae063c0caa7ca25814cf4eb5bbf5b1cef"
+          }
+        },
+        {
           "client_id": "649477859645-dk12rldknf40f1lldoj50dhm2jd7taoq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.altechonduras.calet",
+            "certificate_hash": "90781a08c052247a84c692437e7b7334a736d928"
+          }
+        },
+        {
+          "client_id": "649477859645-uo18eslje9ito8toktspq9lo4c0ut30o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUk98oTs4KqNzdLlhkSNsuqAhD1OeXAzI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "649477859645-uo18eslje9ito8toktspq9lo4c0ut30o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649477859645:android:a81af47b75d2be99",
+        "android_client_info": {
+          "package_name": "com.altechonduras.reportes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "649477859645-gmrhmu1opqrsd0nsk00jhh70naahv34j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.altechonduras.reportes",
             "certificate_hash": "90781a08c052247a84c692437e7b7334a736d928"
           }
         },
