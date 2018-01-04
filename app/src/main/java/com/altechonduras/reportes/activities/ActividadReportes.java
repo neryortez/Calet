@@ -16,7 +16,6 @@ import android.view.View;
 import com.altechonduras.reportes.MainActivity;
 import com.altechonduras.reportes.R;
 import com.altechonduras.reportes.Utilities;
-import com.altechonduras.reportes.dialogs.DialogReportes;
 import com.altechonduras.reportes.objects.Reporte;
 import com.altechonduras.reportes.views.AdaptadorReportes;
 import com.google.firebase.database.DataSnapshot;
@@ -33,6 +32,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.altechonduras.reportes.activities.ReporteDetalleActivity.REFERENCE_REPORTE_DATA;
+import static com.altechonduras.reportes.activities.ReporteDetalleActivity.REFERENCE_REPORTE_FORMAT;
 
 public class ActividadReportes extends AppCompatActivity {
 
@@ -52,18 +54,18 @@ public class ActividadReportes extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        mAdapterItems = new ArrayList<>();
-//        mAdapterKeys = new ArrayList<>();
-
         setupFirebase();
 
 
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        final FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new DialogReportes(ActividadReportes.this, Utilities.getReportData(mReporteID, ActividadReportes.this), reporte).show();
+                Intent i = new Intent(fab.getContext(), ReporteDetalleActivity.class);
+                i.putExtra(REFERENCE_REPORTE_FORMAT, Utilities.getFormatoReporte(mReporteID, ActividadReportes.this));
+                i.putExtra(REFERENCE_REPORTE_DATA, Utilities.getReportData(mReporteID, ActividadReportes.this));
+                startActivity(i);
             }
         });
 

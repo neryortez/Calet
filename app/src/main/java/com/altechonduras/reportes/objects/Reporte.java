@@ -14,11 +14,11 @@ public class Reporte {
     private String _name;
     private String name;
     private String id;
-    private HashMap<String, String> format;
+    private HashMap<String, HashMap<String, Object>> format;
     private ArrayList<String> order;
     private ArrayList<String> recipientes;
     private boolean mostrarSegundo;
-    private HashMap<String, ArrayList<String>> multiples;
+//    private HashMap<String, ArrayList<String>> multiples;
 
     public Reporte(){}
 
@@ -54,11 +54,11 @@ public class Reporte {
         this.id = id;
     }
 
-    public HashMap<String, String> getFormat() {
+    public HashMap<String, HashMap<String, Object>> getFormat() {
         return format;
     }
 
-    public void setFormat(HashMap<String, String> format) {
+    public void setFormat(HashMap<String, HashMap<String, Object>> format) {
         this.format = format;
     }
 
@@ -86,11 +86,11 @@ public class Reporte {
         this.mostrarSegundo = mostrarSegundo;
     }
 
-    public HashMap<String,ArrayList<String>> getMultiples() {
-        return multiples;
-    }
-
-    public void setMultiples(HashMap<String, ArrayList<String>> multiples) {
-        this.multiples = multiples;
-    }
+//    public HashMap<String,ArrayList<String>> getMultiples() {
+//        return multiples;
+//    }
+//
+//    public void setMultiples(HashMap<String, ArrayList<String>> multiples) {
+//        this.multiples = multiples;
+//    }
 }

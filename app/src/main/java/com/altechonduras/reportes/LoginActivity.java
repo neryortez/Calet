@@ -58,7 +58,10 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         grupo = Utilities.getGrupo(this);
-        updateUI(currentUser);
+//        updateUI(currentUser);
+        if(currentUser != null) {
+            enterTheSystem();
+        }
     }
 
     private void updateUI(FirebaseUser currentUser) {
@@ -66,9 +69,11 @@ public class LoginActivity extends AppCompatActivity {
             checkIfThisDeviceLogged(currentUser, null);
 //                startActivity(new Intent(this, MainActivity.class));
 //                this.finish();
-
         }
     }
+
+    // Get a User and ask if the user is logged on other device
+    // If the user is already logged dont bother entering
 
     private void checkIfThisDeviceLogged(FirebaseUser currentUser, final DataSnapshot dataSnapshot) {
         showProgress(true);
@@ -77,8 +82,7 @@ public class LoginActivity extends AppCompatActivity {
             if (getUserValid(user)) {
                 if (usuarioSinLogearOSinDispotivo(user)) {
                     escribirDatosDeUsuario(user, currentUser, dataSnapshot);
-                    startActivity(new Intent(this, MainActivity.class));
-                    this.finish();
+                    enterTheSystem();
                 } else {
                     showProgress(false);
                     Snackbar.make(mEmailView, "Esta cuenta está activa en otro dispositivo.", Snackbar.LENGTH_LONG)
@@ -116,6 +120,11 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private void enterTheSystem() {
+        startActivity(new Intent(this, MainActivity.class));
+        this.finish();
+    }
+
     private void escribirDatosDeUsuario(User user, FirebaseUser currentUser, DataSnapshot dataSnapshot) {
 //        user.setDevice(Utilities.getDevice(this));
 //        user.setEmail(currentUser.getEmail());
@@ -140,14 +149,22 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean DEBUG = true;
         setContentView(R.layout.activity_login);
 
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
         String notFirstRun = "notFirstRun";
-        if (preferences.getBoolean(notFirstRun, false)) {
+//        if (!preferences.getBoolean(notFirstRun, false)) {
+//            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+//            preferences.edit().putBoolean(notFirstRun, true).apply();
+//        }
+        try {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-            preferences.edit().putBoolean(notFirstRun, true).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        FirebaseDatabase.getInstance().getReference().keepSynced(true);
 
 
         database = FirebaseDatabase.getInstance();
@@ -186,6 +203,12 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        if(DEBUG) {
+            mEmailView.setText("neryortez@altechonduras.com");
+            mPasswordView.setText("Ajtama");
+            mGrupoView.setText("Altech");
+        }
     }
 
 

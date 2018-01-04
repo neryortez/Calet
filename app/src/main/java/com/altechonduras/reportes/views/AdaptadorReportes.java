@@ -1,21 +1,28 @@
 package com.altechonduras.reportes.views;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.altechonduras.reportes.R;
-import com.altechonduras.reportes.dialogs.DialogReportes;
+import com.altechonduras.reportes.Utilities;
+import com.altechonduras.reportes.activities.ReporteDetalleActivity;
 import com.altechonduras.reportes.objects.Reporte;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.altechonduras.reportes.activities.ReporteDetalleActivity.EDIT;
+import static com.altechonduras.reportes.activities.ReporteDetalleActivity.ITEM_KEY;
+import static com.altechonduras.reportes.activities.ReporteDetalleActivity.REFERENCE_REPORTE_DATA;
+import static com.altechonduras.reportes.activities.ReporteDetalleActivity.REFERENCE_REPORTE_FORMAT;
 
 
 public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes.ViewHolder, HashMap<String, Object>> {
@@ -39,7 +46,7 @@ public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes
     @Override
     public void onBindViewHolder(AdaptadorReportes.ViewHolder holder, int position) {
         HashMap<String, Object> item = (getItem(position));
-         holder.textViewName.setText((CharSequence) item.get(reporte.getOrder().get(0)));
+        holder.textViewName.setText((CharSequence) item.get(reporte.getOrder().get(0)));
         holder.textViewDescription.setText((reporte.isMostrarSegundo()) ? ((CharSequence) item.get(this.reporte.getOrder().get(1))) : "");
         holder.setItem(item);
         holder.setKey(getKeys().get(position));
@@ -53,7 +60,6 @@ public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes
 
         TextView textViewName;
         TextView textViewDescription;
-        Button mas;
         private Map<String, Object> item;
         private String key;
 
@@ -61,44 +67,18 @@ public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes
             super(view);
             textViewName = view.findViewById(R.id.key);
             textViewDescription = view.findViewById(R.id.descripcion);
-            mas = view.findViewById(R.id.mostrarMas);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    new DialogReportes(view.getContext(), item, (ref), key, reporte, false).show();
+                    Context context = view.getContext();
+                    Intent i = new Intent(context, ReporteDetalleActivity.class);
+                    i.putExtra(REFERENCE_REPORTE_FORMAT, Utilities.getFormatoReporte(reporte.getId(), context));
+                    i.putExtra(REFERENCE_REPORTE_DATA, ref);
+                    i.putExtra(ITEM_KEY, key);
+                    i.putExtra(EDIT, false);
+                    context.startActivity(i);
                 }
             });
-            mas.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new DialogReportes(view.getContext(), item, (ref), key, reporte, false).show();
-                }
-            });
-
-
-//            view.findViewById(R.id.send).setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-//                    emailIntent.setData(Uri.parse("mailto:davidpena.calet@gmail.com"));
-////                    emailIntent.setType("message/rfc822");
-//
-//                    emailIntent.putExtra(Intent.EXTRA_EMAIL  , new String[]{"davidpena.calet@gmail.com", "vmatute@grupocalet.com"});
-//                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reporte: " + item.getRDA());
-//
-//                    String body =
-//                            "RDA: " + item.getRDA() +
-//                                    "\nID de Sitio: " + item.getGasto() +
-//                                    "\nNombre de Sitio: " + item.getNombreSitio() +
-//                                    "\nNúmero de ticket: " + item.getAutorizado() +
-//                                    "\nCombustible: $" + item.getCombustible() +
-//                                    "\nHora Inicio: " + item.getHoraInicio() +
-//                                    "\nHora Final: " + item.getHoraFinal();
-//                    emailIntent.putExtra(Intent.EXTRA_TEXT   , body);
-//
-//                    view.getContext().startActivity(emailIntent);
-//                }
-//            });
         }
 
         public void setItem(Map item) {

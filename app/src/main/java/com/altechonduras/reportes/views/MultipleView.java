@@ -1,6 +1,7 @@
 package com.altechonduras.reportes.views;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -55,6 +56,7 @@ public class MultipleView extends LinearLayout {
     public MultipleView setKey(String key) {
         this.key = key;
         TextView child = new TextView(getContext());
+        child.setTypeface(child.getTypeface(), Typeface.BOLD);
         child.setText(key);
         addView(child, 0);
         return this;
