@@ -150,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        boolean DEBUG = true;
+        boolean DEBUG = false;
         setContentView(R.layout.activity_login);
 
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
