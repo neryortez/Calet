@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 /**
  * Created by Nery Ortez on 22-Dec-17.
  */
@@ -57,6 +59,9 @@ public class MultipleView extends LinearLayout {
         this.key = key;
         TextView child = new TextView(getContext());
         child.setTypeface(child.getTypeface(), Typeface.BOLD);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        params.setMargins(10,10,10,10);
+        child.setLayoutParams(params);
         child.setText(key);
         addView(child, 0);
         return this;
