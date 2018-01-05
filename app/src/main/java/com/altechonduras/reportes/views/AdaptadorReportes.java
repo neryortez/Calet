@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,8 +47,18 @@ public class AdaptadorReportes extends FirebaseRecyclerAdapter<AdaptadorReportes
     @Override
     public void onBindViewHolder(AdaptadorReportes.ViewHolder holder, int position) {
         HashMap<String, Object> item = (getItem(position));
-        holder.textViewName.setText((CharSequence) item.get(reporte.getOrder().get(0)));
-        holder.textViewDescription.setText((reporte.isMostrarSegundo()) ? ((CharSequence) item.get(this.reporte.getOrder().get(1))) : "");
+        try {
+            holder.textViewName.setText((CharSequence) item.get(reporte.getOrder().get(0)));
+        } catch (Exception e) {
+            holder.textViewName.setText("...");
+            Log.d("Error en primer", "called with: position = [" + position + "]");
+        }
+        try {
+            holder.textViewDescription.setText((reporte.isMostrarSegundo()) ? ((CharSequence) item.get(this.reporte.getOrder().get(1))) : "");
+        } catch (Exception e) {
+            holder.textViewDescription.setText("...");
+            Log.d("Error en segundo", "called with: position = [" + position + "]");
+        }
         holder.setItem(item);
         holder.setKey(getKeys().get(position));
     }
