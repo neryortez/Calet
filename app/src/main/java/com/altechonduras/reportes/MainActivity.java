@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ((TextView) findViewById(R.id.user)).setText("Usuario: " + mAuth.getCurrentUser().getEmail());
+        ((TextView) findViewById(R.id.user)).setText(String.format("Usuario: %s", Utilities.getUserName(this)));
 
 //        new LoadImage((ImageView) findViewById(R.id.imageView))
 //                .execute("https://firebasestorage.googleapis.com/v0/b/calet-dc66e.appspot.com/o/22548619_729583130575410_1715317472784384981_o%20(1).jpg?alt=media&token=c614227b-73a1-4c6b-825e-52ac8b8c68ad");

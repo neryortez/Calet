@@ -14,6 +14,9 @@ public class Utilities {
     private static final String PREFERENCES = "preferences";
     private static final String DEVICE = "device";
     private static final String GRUPO = "grupo";
+    private static final String EMAIL = "email";
+    private static final String USERNAME = "user_name";
+
 
     public static String getUserUid() {
         return FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -55,5 +58,21 @@ public class Utilities {
 
     public static String getGroup(Context context) {
         return getGrupo(context);
+    }
+
+    public static void saveUserEmail(Context context, String email) {
+        context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(EMAIL, email).apply();
+    }
+
+    public static String getUserEmail(Context context) {
+        return context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(EMAIL, null);
+    }
+
+    public static void saveUserName(Context context, String email) {
+        context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit().putString(USERNAME, email).apply();
+    }
+
+    public static String getUserName(Context context) {
+        return context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(USERNAME, null);
     }
 }

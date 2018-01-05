@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         grupo = Utilities.getGrupo(this);
 //        updateUI(currentUser);
         if(currentUser != null) {
-            enterTheSystem();
+            enterTheSystem(currentUser);
         }
     }
 
@@ -82,7 +82,10 @@ public class LoginActivity extends AppCompatActivity {
             if (getUserValid(user)) {
                 if (usuarioSinLogearOSinDispotivo(user)) {
                     escribirDatosDeUsuario(user, currentUser, dataSnapshot);
-                    enterTheSystem();
+
+                    // Save the userName before entering the system...
+                    Utilities.saveUserName(this, user.getName());
+                    enterTheSystem(currentUser);
                 } else {
                     showProgress(false);
                     Snackbar.make(mEmailView, "Esta cuenta está activa en otro dispositivo.", Snackbar.LENGTH_LONG)
@@ -120,7 +123,8 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void enterTheSystem() {
+    private void enterTheSystem(FirebaseUser currentUser) {
+//        Utilities.saveUserEmail(this, currentUser.getEmail());
         startActivity(new Intent(this, MainActivity.class));
         this.finish();
     }
@@ -307,7 +311,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     u.setDevice(Utilities.getDevice(LoginActivity.this));
                                                     dataSnapshot.getRef().setValue(new User());
 
-                                                    updateUI(user);
+                                                    checkIfThisDeviceLogged(user, null);
                                                     showProgress(false);
                                                 }
                                             }
