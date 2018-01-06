@@ -26,14 +26,17 @@ public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ViewHolder> 
 
     private final Context context;
     private final String title;
+    private boolean canEdit;
     private ArrayList<HashMap<String, String>> lista;
     private final ArrayList<String> campos;
 
-    public ListaAdapter(ArrayList<HashMap<String, String>> lista, ArrayList<String> campos, Context context, String title) {
+    public ListaAdapter(ArrayList<HashMap<String, String>> lista, ArrayList<String> campos,
+                        Context context, String title, boolean canEdit) {
         this.context = context;
         this.lista = lista != null ? lista : new ArrayList<HashMap<String, String>>(0);
         this.campos = campos;
         this.title = title;
+        this.canEdit = canEdit;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.setItem(getItem(position));
+        holder.setItem(getItem(position), this.canEdit);
     }
 
     private HashMap<String, String> getItem(int position) {
@@ -64,10 +67,10 @@ public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ViewHolder> 
     }
 
     public void addNew() {
-        addOrEditNew(null, -1);
+        showItemInDialog(null, -1, true);
     }
 
-    private void addOrEditNew(final HashMap<String, String> item, final int index) {
+    private void showItemInDialog(final HashMap<String, String> item, final int index, boolean canEdit) {
         final HashMap<String, String> e = new HashMap<>();
         if (item != null) {
             e.putAll(item);
@@ -79,35 +82,50 @@ public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ViewHolder> 
 
         for (String campo : campos) {
             EditText edit = new EditText(context);
+            if(!canEdit) { edit.setKeyListener(null); }
             edit.setHint(campo);
             dialogLayout.addView(edit);
             camposMap.put(campo, edit);
             if (e.size() > 0) edit.setText(e.get(campo));
 
         }
+
+        // TODO: Depurar y hacer mejor a la lectura el uso de canEdit e item==null
         new AlertDialog.Builder(context)
                 .setView(dialogLayout)
-                .setPositiveButton("Guardar", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        for (String key : camposMap.keySet()) {
-                            e.put(key, camposMap.get(key).getText().toString());
-                        }
-                        if (item == null) {
-                            lista.add(e);
-                            notifyItemInserted(lista.indexOf(e));
-                        } else {
-                            lista.set(index, e);
-                            notifyItemChanged(index);
-                        }
-                    }
-                }).setNegativeButton(item == null ? "Cancelar" : "Borrar", item == null ? null : new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        lista.remove(index);
-                        notifyItemRemoved(index);
-                    }
-                })
+                .setPositiveButton(
+                        canEdit ? "Guardar" : "Aceptar",
+                        canEdit ?
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        for (String key : camposMap.keySet()) {
+                                            e.put(key, camposMap.get(key).getText().toString());
+                                        }
+                                        if (item == null) {
+                                            lista.add(e);
+                                            notifyItemInserted(lista.indexOf(e));
+                                        } else {
+                                            lista.set(index, e);
+                                            notifyItemChanged(index);
+                                        }
+                                    }
+                                }
+                                :
+                                null)
+                .setNegativeButton(
+                        item == null ?
+                                "Cancelar"
+                                :
+                                canEdit ?
+                                        "Borrar" : "",
+                        item == null ? null : new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                lista.remove(index);
+                                notifyItemRemoved(index);
+                            }
+                        })
                 .setTitle(title)
                 .show();
     }
@@ -119,6 +137,11 @@ public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ViewHolder> 
 
     public ArrayList<HashMap<String, String>> getLista() {
         return lista;
+    }
+
+    public void setEditable(boolean editable) {
+        this.canEdit = editable;
+        notifyDataSetChanged();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -138,15 +161,13 @@ public class ListaAdapter extends RecyclerView.Adapter<ListaAdapter.ViewHolder> 
             }
         }
 
-        public void setItem(final HashMap<String, String> item) {
+        void setItem(final HashMap<String, String> item, final boolean editable) {
             for (String campo : viewMap.keySet()) {
                 viewMap.get(campo).setText(item.get(campo));
             }
             this.view.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
-                    addOrEditNew(item, getAdapterPosition());
-                }
+                public void onClick(View view) {showItemInDialog(item, getAdapterPosition(), editable);}
             });
         }
     }

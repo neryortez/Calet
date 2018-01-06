@@ -175,6 +175,7 @@ public class ReporteDetalleActivity extends AppCompatActivity {
                     view.setEnabled(false);
                 } else if (view instanceof LinearLayout) {
                     view.findViewById(R.id.addOne).setClickable(false);
+                    ((ListaAdapter) ((RecyclerView) view.findViewById(R.id.recyclerview)).getAdapter()).setEditable(false);
                 }
             }
 
@@ -260,7 +261,7 @@ public class ReporteDetalleActivity extends AppCompatActivity {
                                 new ArrayList<HashMap<String, String>>(),
                                 ((ArrayList<String>) campo.get("campos")),
                                 context,
-                                key));
+                                key, true));
                 ((TextView) view.findViewById(R.id.title)).setText(key);
                 view.findViewById(R.id.addOne).setOnClickListener(new View.OnClickListener() {
                     @Override
